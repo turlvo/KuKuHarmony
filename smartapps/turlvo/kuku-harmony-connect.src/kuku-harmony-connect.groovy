@@ -21,16 +21,16 @@ def mainPage() {
         installPage()
     } else {
         dynamicPage(name: "mainPage", title: "", uninstall: true) {
-            if (selectedHub) {                
+            if (installHub) {                
                 section("Harmony-API Server") {
                     paragraph "${harmonyHubIP}"                    
                 }
                 
                 section("Harmony-Hub") {
-                    paragraph "${selectedHub}"                    
+                    paragraph "${installHub}"                    
                 }
                 
-                initHarmonyDevInfo(selectedHub)
+                initHarmonyDevInfo(installHub)
                 //getHubDevicesFunctions(selectedHub, 'lg-tv')
                 section("Devices") {
                     app( name: "harmonyDevices", title: "Add a device...", appName: "KuKu Harmony (Child)", namespace: "turlvo", multiple: true, uninstall: false)
@@ -69,12 +69,35 @@ def installHubPage() {
             }
             section("Harmony Hub") {
                 def hubs = getHubs(harmonyHubIP)                    
-                input name: "selectedHub", type: "enum", title: "Select Hub", options: hubs, submitOnChange: true, required: false
+                input name: "installHub", type: "enum", title: "Select Hub", options: hubs, submitOnChange: true, required: true
+                log.debug "installHubPage>> installHub: $installHub"
             }
         }    
     }
 }
+def addDeviceDone() {
+    //def devices = getDevices()    
+    log.debug "addDeviceDone: $selectedDevice"
+    app.updateLabel("$selectedDevice")
+    //log.debug "addDeviceDone: $selectedFunctions"
 
+    //addChildDevice("kukuharmony", "KuKu Harmony", "asdfasfd12312", "kuku", [ "label": "Sonoff Wifi Switch"])
+
+    def device = []
+    //selectedDevice.each {
+    device = parent.getDeviceByName("$selectedDevice")
+    log.debug "addDeviceDone>> device: $device"    
+
+    def deviceId = device.id
+    def existing = getChildDevice(deviceId)
+    if (!existing) {
+        def childDevice = addChildDevice("kukuharmony", "KuKu Harmony", deviceId, null, ["label": device.label])
+    } else {
+        log.debug "Device already created"
+    }
+    //}
+
+}
 def getSelectedHub() {
 	return atomicState.hub
 }

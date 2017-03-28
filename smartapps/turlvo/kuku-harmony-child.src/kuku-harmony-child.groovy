@@ -60,7 +60,7 @@ def addDeviceDone() {
     def deviceId = device.id
     def existing = getChildDevice(deviceId)
     if (!existing) {
-        def childDevice = addChildDevice("kukuharmony", "KuKu Harmony", deviceId, null, ["label": device.label])
+        def childDevice = addChildDevice("turlvo", "KuKu Harmony", deviceId, null, ["label": device.label])
     } else {
         log.debug "Device already created"
     }
