@@ -22,38 +22,26 @@ def mainPage() {
     } else {
         dynamicPage(name: "mainPage", title: "", uninstall: true) {
             if (installHub) {                
-                section("Harmony-API Server") {
+                section("Harmony-API IP Address :") {
                     paragraph "${harmonyHubIP}"                    
                 }
                 
-                section("Harmony-Hub") {
+                section("Harmony-Hub :") {
                     paragraph "${installHub}"                    
                 }
                 
-                initHarmonyDevInfo(installHub)
-                //getHubDevicesFunctions(selectedHub, 'lg-tv')
+
                 section("Devices") {
                     app( name: "harmonyDevices", title: "Add a device...", appName: "KuKu Harmony (Child)", namespace: "turlvo", multiple: true, uninstall: false)
                 }
             }
-
-			// ToDo: make a DTH with selected command
-            //if (selectedFunctions) {
-            //    log.debug("selectedFunctions: $selectedFunctions")
-            //    addDeviceDone()
-            //}
-        //    if (selectedDevice) {
-         //       log.debug("selectedDevice: $selectedDevice")
-         //       addDeviceDone()
-          //  }
-            
         }
     }
 }
 
 def installPage() {
 	return dynamicPage(name: "installPage", title: "", nextPage:"installHubPage") {
-    	section("Enter the Harmony-API IP address") {
+    	section("Enter the Harmony-API IP address :") {
         	input name: "harmonyHubIP", type: "text", required: true, title: "IP address?"
         }
     }  	
@@ -61,20 +49,35 @@ def installPage() {
 }
 
 def installHubPage() {
-	return dynamicPage(name: "installHubPage", title: "", install: true) {
+	return dynamicPage(name: "installHubPage", title: "", refreshInterval: 3, install: true) {
         if (harmonyHubIP) {
+        	atomicState.hubIP = harmonyHubIP
+            if (atomicState.discoverdHubs == null) {
+        		discoverHubs(harmonyHubIP)
+            }
             //log.debug "harmonyHubIP: $harmonyHubIP"            
-            section("Harmony-API Server") {
+            section("Harmony-API IP Address :") {
                 paragraph "${harmonyHubIP}"
             }
-            section("Harmony Hub") {
-                def hubs = getHubs(harmonyHubIP)                    
-                input name: "installHub", type: "enum", title: "Select Hub", options: hubs, submitOnChange: true, required: true
-                log.debug "installHubPage>> installHub: $installHub"
+            
+
+            section("Harmony Hub :") {
+                if (atomicState.discoverdHubs) {
+                    //def hubs = getHubs(harmonyHubIP)                    
+                    input name: "installHub", type: "enum", title: "Select Hub", options: atomicState.discoverdHubs, submitOnChange: true, required: true
+                    log.debug "installHubPage>> installHub: $installHub"
+                    if (installHub) {
+                    	discoverDevices(installHub)
+                        atomicState.hub = installHub
+                    }
+                } else {                    
+                    paragraph "Discovering Harmony Hub.  Please wait..."
+                }
             }
         }    
     }
 }
+
 def addDeviceDone() {
     //def devices = getDevices()    
     log.debug "addDeviceDone: $selectedDevice"
@@ -84,7 +87,7 @@ def addDeviceDone() {
     //addChildDevice("kukuharmony", "KuKu Harmony", "asdfasfd12312", "kuku", [ "label": "Sonoff Wifi Switch"])
 
     def device = []
-    //selectedDevice.each {
+    
     device = parent.getDeviceByName("$selectedDevice")
     log.debug "addDeviceDone>> device: $device"    
 
@@ -95,30 +98,43 @@ def addDeviceDone() {
     } else {
         log.debug "Device already created"
     }
-    //}
-
 }
+
+// Default Method
+def installed() {
+    atomicState.isInstalled = true    
+    //initHarmonyDevInfo(harmonyHubIP, installHub)
+    initialize()
+}
+
+def updated() {
+    //unsubscribe()
+    initialize()
+}
+
+def initialize() {
+   // addDeviceDone()
+}
+
+def uninstalled() {
+    removeChildDevices(getChildDevices())
+}
+
+private removeChildDevices(delete) {
+    delete.each {
+        deleteChildDevice(it.deviceNetworkId)
+    }
+}
+
+
+// Hub Command
 def getSelectedHub() {
 	return atomicState.hub
 }
 
-def initHarmonyDevInfo(hubname) {	
+def initHarmonyDevInfo(hubip, hubname) {	
 	atomicState.hub = hubname
-    atomicState.devices = getHubDevices(hubname)
-   
-   	// ToDo: make a DTH with selected command
-   	def devCommands = [] 
-    atomicState.devices.each {
-    	//log.debug "initHarmonyInformation: device : $it"
-        def commands = getHubDevicesCommands(hubname, it.slug)
-        //log.debug "initHarmonyInformation: commands : $commands"
-    	devCommands.add(["label":it.label, "commands":commands])
-    }
-    atomicState.commands = devCommands
-    //atomicState.commands.each {
-    //	log.debug "initHarmonyInformation: all commands : $it.label"
-    //    log.debug "initHarmonyInformation: all commands : $it.commands"
-    //}
+    atomicState.hubIP = hubip
 }
 
 def getLabelsOfDevices(devices) {
@@ -132,29 +148,23 @@ def getLabelsOfDevices(devices) {
 
 }
 
-def getLabelsOfCommands(commands) {
-
+def getLabelsOfCommands(cmds) {
 	def labels = []
-    commands.each {
-    	//log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
+    log.debug "getLabelsOfCommands>> cmds"
+    cmds.each {
+    	log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
     	labels.add(it.label)
     }
     
     return labels
 }
 
-def getCommandsOfDevice(device) {
-	def commands = []
-	atomicState.commands.each {    	
-    	if (it.label == device) {
-        	//log.debug "it.label : $it.label, device : $device"
-        	//log.debug "it.commands : $it.commands"
-        	commands = it.commands
-        }
-    }
-    return commands
-}
+def getCommandsOfDevice() {
+    //log.debug "getCommandsOfDevice>> $atomicState.foundCommandOfDevice"
+    
+    return atomicState.foundCommandOfDevice
 
+}
 
 def getSlugOfCommandByLabel(commands, label) {
 	//def commands = []
@@ -174,7 +184,7 @@ def getSlugOfCommandByLabel(commands, label) {
 def getDeviceByName(name) {
 	def device = []    
 	atomicState.devices.each {
-    	log.debug "getDeviceByName>> $it.label, $name"
+    	//log.debug "getDeviceByName>> $it.label, $name"
     	if (it.label == name) {
     		log.debug "getDeviceByName>> $it"
             device = it
@@ -183,49 +193,7 @@ def getDeviceByName(name) {
     
     return device
 }
-
-def installed() {
-    atomicState.isInstalled = true    
-    initialize()
-}
-
-def updated() {
-    //unsubscribe()
-    initialize()
-}
-
-
-
-def getHubUri() {
-	return "http://kuku.pe.kr:8282"
-}
-
-def getHubs(address) {
-	log.debug "getHubs(), address: $address"
-	def params = [
-        uri: "http://$address",
-        path: '/hubs'
-    ]
-    //log.debug "uri : $params"
-    def result = []
-    try {
-        httpGet(params) {resp ->
-            //log.debug "resp data: ${resp.data}"
-            if(resp.data) {            	
-                resp.data.hubs.each {
-                    //log.debug "getHubDevices: $it"
-                    result.add(it)
-                }
-            }            
-        }
-    } catch (e) {
-        log.error "error: $e"        
-    }
-    
-    log.debug "result: $result"
-    return result
-    
-}    
+ 
 
 def getHubStatus(hubName) {
 	def params = [
@@ -245,110 +213,101 @@ def getHubStatus(hubName) {
     //return result
 }
 
-def getHubActivities(hubName) {
-	def params = [
-        uri: getHubUri(),
-        path: "/hubs/" + "$hubName" + "/activities"
-    ]
-    //log.debug "uri : $params"
-    
-    try {
-        httpGet(params) {resp ->
-            log.debug "resp data: ${resp.data}"
-            //result = ${resp.data}
-        }
-    } catch (e) {
-        log.error "error: $e"        
-    }
-    //return result
+def getHubDevices() {
+	return atomicState.devices
 }
 
-def getHubDevices(hubname) {
-	def params = [
-        uri: "http://$harmonyHubIP",
-        path: "/hubs/$hubname/devices"
-    ]
-    //log.debug "uri : $params"
-	
-    def result = []
-    try {
-        httpGet(params) {resp ->
-            //log.debug "resp data: ${resp.data}"
-            //result = ${resp.data.devices}
-            if(resp.data) {            	
-                resp.data.devices.each {
-                    //log.debug "getHubDevices: $it.id, $it.label, $it.slug"
-                    def device = ['id' : it.id, 'label' : it.label, 'slug' : it.slug]
-                    result.add(device)
-                }
-            }
-        }
-    } catch (e) {
-        log.error "error: $e"        
+def getHubDevicesCommands() {
+	atomicState.commands.each {
+    	log.debug "getHubDevicesCommands>> $it"
     }
-    return result
-}
-
-def getHubDevicesCommands(hubname, deviceslug) {
-	def params = [
-        uri: "http://$harmonyHubIP",
-        path: "/hubs/$hubname/devices/$deviceslug/commands"
-    ]
-    //log.debug "getHubDevicesFunctions: $param"
-	def result = []
-    def commands = []
-    try {
-        httpGet(params) {resp ->
-            //log.debug "resp data: ${resp.data}"
-            if(resp.data) {            	
-                resp.data.commands.each {
-                    //log.debug "getHubDevicesFunctions: $it"
-                    def command = ['label' : it.label, 'slug' : it.slug]    
-                    result.add(command)
-                }
-            }
-        }
-    } catch (e) {
-        log.error "error: $e"        
-    }
-    //log.debug "getHubDevicesFunctions: commands: $commands"
-    //result.add(commands)
-    //log.debug "getHubDevicesFunctions: $result"
-    return result
+	return atomicState.commands
 }
 
 
+// HubAction Methos
 def sendCommandToDevice(device, command) {
-	def params = [
-        uri: "http://$harmonyHubIP",
-        path: "/hubs/" + "${atomicState.hub}" + "/devices/" + "$device" + "/commands/" + "$command" 
-    ]
-    log.debug "sendCommandToDevice >> uri : $params"
+    sendHubCommand(setHubAction(atomicState.hubIP, "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
+}
+
+def sendCommandToDevice_response(resp) {
+    def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("discoverHubs_response >> $body")
+}
+
+def discoverCommandsOfDevice(name) {
+	device = getDeviceByName(name)
+    log.debug "discoverCommandsOfDevice>> name:$name, device:$device"
     
-    def result
-    try {
-        httpPost(params) {resp ->
-            log.debug "resp data: ${resp.data}"
-            result = resp.data
+    sendHubCommand(getHubAction(atomicState.hubIP, "/hubs/$atomicState.hub/devices/${device.slug}/commands", "discoverCommandsOfDevice_response"))
+
+}
+
+def discoverCommandsOfDevice_response(resp) {
+   	def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+	
+    if(body) {            	
+        body.commands.each {            
+            def command = ['label' : it.label, 'slug' : it.slug]
+            //log.debug "getCommandsOfDevice_response>> command: $command"
+            result.add(command)            
         }
-    } catch (e) {
-        log.error "error: $e"        
     }
-    return result
+    
+    atomicState.foundCommandOfDevice = result
+
+}
+def discoverDevices(hubname) {
+	log.debug "discoverDevices>> $hubname"
+	sendHubCommand(getHubAction(atomicState.hubIP, "/hubs/$hubname/devices", "discoverDevices_response"))
+}
+
+def discoverDevices_response(resp) {
+	def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("discoverHubs_response >> $body.hubs")
+	
+    if(body) {            	
+        body.devices.each {
+            //log.debug "getHubDevices_response: $it.id, $it.label, $it.slug"
+            def device = ['id' : it.id, 'label' : it.label, 'slug' : it.slug]
+            result.add(device)
+        }
+    }            
+    atomicState.devices = result
+
 }
 
 
-def initialize() {
-
-   // addDeviceDone()
+def discoverHubs(host) {
+	log.debug("discoverHubs")
+    return sendHubCommand(getHubAction(host, "/hubs", "discoverHubs_response"))
 }
 
-def uninstalled() {
-    removeChildDevices(getChildDevices())
+def discoverHubs_response(resp) {
+	def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("discoverHubs_response >> $body.hubs")
+	
+    if(body) {            	
+        body.hubs.each {
+            log.debug "discoverHubs_response: $it"
+            result.add(it)
+        }
+    }            
+    atomicState.discoverdHubs = result
 }
 
-private removeChildDevices(delete) {
-    delete.each {
-        deleteChildDevice(it.deviceNetworkId)
-    }
+def getHubAction(host, url, callback) {
+	log.debug "getHubAction>> $host, $url, $callback"
+    return new physicalgraph.device.HubAction("GET ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
+            physicalgraph.device.Protocol.LAN, "${host}", [callback: callback])
+}
+
+def setHubAction(host, url, callback) {
+	log.debug "getHubAction>> $host, $url, $callback"
+    return new physicalgraph.device.HubAction("POST ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
+            physicalgraph.device.Protocol.LAN, "${host}", [callback: callback])
 }

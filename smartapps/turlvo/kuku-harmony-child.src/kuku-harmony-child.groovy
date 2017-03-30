@@ -2,7 +2,7 @@ definition(
     name: "KuKu Harmony (Child)", 
     namespace: "turlvo",
     author: "KuKu",
-    description: "This is my first SmartApp. Woot!",
+    description: "This is a SmartApp that support to control Harmony's device!",
     category: "My Apps",
 
     parent: "turlvo:KuKu Harmony (Connect)",
@@ -15,28 +15,31 @@ preferences {
 }
 
 def addDevicePage() {
-    return dynamicPage(name: "addDevicePage", title: "Add Device", uninstall: true, install: true) {
-    	def selectedHub
-        selectedHub = parent.getSelectedHub();
+    return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: 3, uninstall: true, install: true) {
+    	def selectedHub = parent.getSelectedHub()
+        def deviceCommands = parent.getCommandsOfDevice()        
         log.debug "selectedHub: $selectedHub"            
         section("Select Device") {
-            def devices = parent.getHubDevices("$selectedHub")                    
+            def devices = parent.getHubDevices()                    
             def labelOfDevice = parent.getLabelsOfDevices(devices)
             input name: "selectedDevice", type: "enum", title: "Devices", multiple: false, options: labelOfDevice, submitOnChange: true, required: true
+            parent.discoverCommandsOfDevice(selectedDevice)
         }
 
-        if (selectedDevice) {
-            def commands = parent.getCommandsOfDevice(selectedDevice)
-            //log.debug "addDevice() : commands : $commands"
-            def labelOfCommand = parent.getLabelsOfCommands(commands)
+        if (selectedDevice && deviceCommands) {                         
+            def labelOfCommand = parent.getLabelsOfCommands(deviceCommands)
             section("Select Power-on command") {            
                 input name: "selectedPowerOnFunction", type: "enum", title: "Functions", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
             }
             section("Select Power-off command") {            
                 input name: "selectedPowerOffFunction", type: "enum", title: "Functions", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
             }
+        } else if (selectedDevice && deviceCommands == null) {
+            // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
+            section("") {
+                paragraph "Loading selected device's command.  This can take a minute. Please wait..."
+            }
         }
-      
     }
  // ToDo: make a DTH with selected command
         if (selectedPowerOnFunction && selectedPowerOffFunction) {
@@ -50,7 +53,6 @@ def addDeviceDone() {
     app.updateLabel("$selectedDevice")
     //log.debug "addDeviceDone: $selectedFunctions"
 
-    //addChildDevice("kukuharmony", "KuKu Harmony", "asdfasfd12312", "kuku", [ "label": "Sonoff Wifi Switch"])
 
     def device = []
     //selectedDevice.each {
@@ -105,14 +107,14 @@ def on(child) {
     device = parent.getDeviceByName("$selectedDevice")
     log.debug "on>> device : $device"
     
-    def deviceCommands = parent.getCommandsOfDevice("$selectedDevice")
+    def deviceCommands = parent.getCommandsOfDevice()
     def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOnFunction)
     log.debug "childApp parent on() >>  $selectedPowerOffFunction, $commandSlug"
     
     def result
     result = parent.sendCommandToDevice(device.slug, commandSlug)
-    if (result.message != "ok") {
-    	parent.sendCommandToDevice(device.slug, commandSlug)
+    if (result && result.message != "ok") {
+   		parent.sendCommandToDevice(device.slug, commandSlug)
     }
 }
 
@@ -121,13 +123,13 @@ def off(child) {
     def device = parent.getDeviceByName("$selectedDevice")
     log.debug "off>> device : $device"
 
-	def deviceCommands = parent.getCommandsOfDevice("$selectedDevice")
+	def deviceCommands = parent.getCommandsOfDevice()    
     def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOffFunction)
     log.debug "childApp parent off() >>  $selectedPowerOffFunction, $commandSlug"
     
     def result
     result = parent.sendCommandToDevice(device.slug, commandSlug)
-    if (result.message != "ok") {
-    	parent.sendCommandToDevice(device.slug, commandSlug)
+    if (result && result.message != "ok") {
+        parent.sendCommandToDevice(device.slug, commandSlug)
     }
 }
