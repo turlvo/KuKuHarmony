@@ -11,8 +11,10 @@ Other device's commands are not supported not yet.
 ## Features
 
 * Provide a device's Simulated Switch
-* List devices.
-* Turn on/off each device
+* List Hubs
+* List Devices
+* List Commands
+* Turn on/off each device(not a activity)
 
 ## Setup
 
