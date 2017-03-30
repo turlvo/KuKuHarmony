@@ -24,7 +24,7 @@ Other device's commands are not supported not yet. ex) volume up/down, channel u
     
     - SmartThings Application Work(Installation)
     4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony (Connect)'
-    5) Input server's public IP address 'Harmony API' is installed(T.T should change to HubAction)
+    5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)
     6) Select a one Hub to control
     7) Done
     
