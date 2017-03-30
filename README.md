@@ -1,12 +1,11 @@
 # KuKuHarmony
 
 KuKuHarmony is a SmartApp give users the ability to control each device by Logitech Harmony.
-
 It must work based on '[Harmony API](https://github.com/maddox/harmony-api)'
 
 With KuKuHarmony based on 'Harmony API', you can turn on and turn off devices individually.
-
-Other device's commands are not supported not yet. ex) volume up/down, channel up/down, FanSpeed, Menu and so on
+Other device's commands are not supported not yet. 
+- ex) volume up/down, channel up/down, FanSpeed, Menu and so on
 
 
 ## Features
