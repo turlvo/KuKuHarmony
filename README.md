@@ -20,6 +20,19 @@ Other device's commands are not supported not yet.
 
     - Server Work
     1) Install 'Harmony API' on server following Harmony API's install instruction
+    OR
+    1) Raspberry Docker
+        - Download Image
+        docker search turlvo/harmony-api
+        docker pull turlvo/harmony-api
+        
+        - Make a container
+        docker run -ti --net=host --name harmony-api turlvo/harmony-api:latest /bin/bash
+        
+        - Execute harmony-api server
+        # cd /home/harmony-api/harmony-api/script/
+        # ./server
+   
     
     - Web IDE Work
     2) Add 'KuKu Harmony' DTH and 'KuKu Harmony (Connect)'/'KuKu Harmony (Child)' SmartApp
