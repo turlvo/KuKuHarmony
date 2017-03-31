@@ -21,7 +21,7 @@ Other device's commands are not supported not yet.
     - Server Work
     1) Install 'Harmony API' on server following Harmony API's install instruction
     OR
-    1) Raspberry Docker
+    1) Pre-build Docker image fpr Raspberry-pie platform
         - Download Image
         docker search turlvo/harmony-api
         docker pull turlvo/harmony-api
