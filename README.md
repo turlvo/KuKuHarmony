@@ -24,6 +24,7 @@ Other device's commands are not supported not yet.
     - Web IDE Work
     2) Add 'KuKu Harmony' DTH and 'KuKu Harmony (Connect)'/'KuKu Harmony (Child)' SmartApp
     3) Publish 'KuKu Harmony' DTH and 'KuKu Harmony (Connect)' SmartApp for me
+    (Ar first, 'KuKu Hamorny (Connect) must be installed, After that install 'Child' SmartApp)
     
     - SmartThings Application Work(Installation)
     4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony (Connect)'
