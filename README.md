@@ -52,6 +52,6 @@ Other device's commands are not supported not yet.
     
     [Korean]
     Following below blog's instruction.
-    [http://kuku.pe.kr/?p=6313](http://kuku.pe.kr/?p=6313)
+    [Korean Installation](http://kuku.pe.kr/?p=6313)
     
    
