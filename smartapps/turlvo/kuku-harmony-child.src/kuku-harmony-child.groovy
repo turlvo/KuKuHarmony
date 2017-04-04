@@ -16,9 +16,20 @@ preferences {
 
 def addDevicePage() {
     return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: 3, uninstall: true, install: true) {
-    	def selectedHub = parent.getSelectedHub()
-        def deviceCommands = parent.getCommandsOfDevice()        
-        log.debug "selectedHub: $selectedHub"            
+    	if (atomicState.selectedHub == null 
+        	|| atomicState.selectedHub == []) {        
+    		log.debug "atomicState.selectedHub is null... get a data"
+            atomicState.selectedHub = parent.getSelectedHub()
+            log.debug "atomicState.selectedHub is $atomicState.selectedHub"
+        }
+        if (selectedDevice != null
+        	&& (atomicState.deviceCommands == null
+        	|| atomicState.deviceCommands == [])) {
+        	log.debug "atomicState.deviceCommands is null... get a data"
+        	atomicState.deviceCommands = parent.getCommandsOfDevice()
+            log.debug "atomicState.deviceCommands is $atomicState.deviceCommands"
+        }
+        log.debug "selectedHub: $atomicState.selectedHub"            
         section("Select Device") {
             def devices = parent.getHubDevices()                    
             def labelOfDevice = parent.getLabelsOfDevices(devices)
@@ -26,15 +37,15 @@ def addDevicePage() {
             parent.discoverCommandsOfDevice(selectedDevice)
         }
 
-        if (selectedDevice && deviceCommands) {                         
-            def labelOfCommand = parent.getLabelsOfCommands(deviceCommands)
+        if (selectedDevice && atomicState.deviceCommands) {                         
+            def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
             section("Select Power-on command") {            
                 input name: "selectedPowerOnFunction", type: "enum", title: "Functions", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
             }
             section("Select Power-off command") {            
                 input name: "selectedPowerOffFunction", type: "enum", title: "Functions", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
             }
-        } else if (selectedDevice && deviceCommands == null) {
+        } else if (selectedDevice && atomicState.deviceCommands == null) {
             // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
             section("") {
                 paragraph "Loading selected device's command.  This can take a minute. Please wait..."

@@ -16,6 +16,8 @@ preferences {
     page(name: "installHubPage")
 }
 
+// mainPage
+// seperated two danymic page by 'isInstalled' value 
 def mainPage() {
     if (!atomicState?.isInstalled) {
         installPage()
@@ -28,10 +30,9 @@ def mainPage() {
                 
                 section("Harmony-Hub :") {
                     paragraph "${installHub}"                    
-                }
-                
+                }                
 
-                section("Devices") {
+                section("") {
                     app( name: "harmonyDevices", title: "Add a device...", appName: "KuKu Harmony (Child)", namespace: "turlvo", multiple: true, uninstall: false)
                 }
             }
@@ -39,6 +40,8 @@ def mainPage() {
     }
 }
 
+// installPage
+// entering 'Harmony-API' server ip address
 def installPage() {
 	return dynamicPage(name: "installPage", title: "", nextPage:"installHubPage") {
     	section("Enter the Harmony-API IP address :") {
@@ -48,6 +51,8 @@ def installPage() {
     
 }
 
+// installHubPage
+// select hub name in searched hub list
 def installHubPage() {
 	return dynamicPage(name: "installHubPage", title: "", refreshInterval: 3, install: true) {
         if (harmonyHubIP) {
@@ -78,32 +83,11 @@ def installHubPage() {
     }
 }
 
-def addDeviceDone() {
-    //def devices = getDevices()    
-    log.debug "addDeviceDone: $selectedDevice"
-    app.updateLabel("$selectedDevice")
-    //log.debug "addDeviceDone: $selectedFunctions"
 
-    //addChildDevice("kukuharmony", "KuKu Harmony", "asdfasfd12312", "kuku", [ "label": "Sonoff Wifi Switch"])
-
-    def device = []
-    
-    device = parent.getDeviceByName("$selectedDevice")
-    log.debug "addDeviceDone>> device: $device"    
-
-    def deviceId = device.id
-    def existing = getChildDevice(deviceId)
-    if (!existing) {
-        def childDevice = addChildDevice("kukuharmony", "KuKu Harmony", deviceId, null, ["label": device.label])
-    } else {
-        log.debug "Device already created"
-    }
-}
-
-// Default Method
+// ------------------------------
+// ------- Default Method -------
 def installed() {
     atomicState.isInstalled = true    
-    //initHarmonyDevInfo(harmonyHubIP, installHub)
     initialize()
 }
 
@@ -127,16 +111,19 @@ private removeChildDevices(delete) {
 }
 
 
-// Hub Command
+// ---------------------------
+// ------- Hub Command -------
+
+// getSelectedHub
+// return : Installed hub name
 def getSelectedHub() {
 	return atomicState.hub
 }
 
-def initHarmonyDevInfo(hubip, hubname) {	
-	atomicState.hub = hubname
-    atomicState.hubIP = hubip
-}
-
+// getLabelsOfDevices
+// parameter :
+// - devices : List of devices in Harmony Hub {label, slug}
+// return : Array of devices's label value
 def getLabelsOfDevices(devices) {
 	def labels = []
     devices.each { 
@@ -148,6 +135,10 @@ def getLabelsOfDevices(devices) {
 
 }
 
+// getLabelsOfCommands
+// parameter :
+// - cmds : List of some device's commands {label, slug}
+// return : Array of commands's label value
 def getLabelsOfCommands(cmds) {
 	def labels = []
     log.debug "getLabelsOfCommands>> cmds"
@@ -159,6 +150,8 @@ def getLabelsOfCommands(cmds) {
     return labels
 }
 
+// getCommandsOfDevice
+// return : result of 'discoverCommandsOfDevice(device)' method. It means that recently requested device's commands
 def getCommandsOfDevice() {
     //log.debug "getCommandsOfDevice>> $atomicState.foundCommandOfDevice"
     
@@ -166,6 +159,11 @@ def getCommandsOfDevice() {
 
 }
 
+// getSlugOfCommandByLabel
+// parameter :
+// - commands : List of device's command
+// - label : name of command
+// return : slug value same with label in the list of command
 def getSlugOfCommandByLabel(commands, label) {
 	//def commands = []
     def slug
@@ -181,6 +179,10 @@ def getSlugOfCommandByLabel(commands, label) {
     return slug
 }
 
+// getDeviceByName
+// parameter :
+// - name : device name searching
+// return : device matched by name in Harmony Hub's devices
 def getDeviceByName(name) {
 	def device = []    
 	atomicState.devices.each {
@@ -194,7 +196,15 @@ def getDeviceByName(name) {
     return device
 }
  
+// getHubDevices
+// return : searched list of device in Harmony Hub when installed
+def getHubDevices() {
+	return atomicState.devices
+}
 
+
+// --------------------------------
+// ------- HubAction Methos -------
 def getHubStatus(hubName) {
 	def params = [
         uri: getHubUri(),
@@ -213,19 +223,11 @@ def getHubStatus(hubName) {
     //return result
 }
 
-def getHubDevices() {
-	return atomicState.devices
-}
-
-def getHubDevicesCommands() {
-	atomicState.commands.each {
-    	log.debug "getHubDevicesCommands>> $it"
-    }
-	return atomicState.commands
-}
-
-
-// HubAction Methos
+// sendCommandToDevice
+// parameter : 
+// - device : target device
+// - command : sending command
+// return : 'sendCommandToDevice_response()' method callback
 def sendCommandToDevice(device, command) {
     sendHubCommand(setHubAction(atomicState.hubIP, "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
 }
@@ -236,6 +238,10 @@ def sendCommandToDevice_response(resp) {
     log.debug("discoverHubs_response >> $body")
 }
 
+// discoverCommandsOfDevice
+// parameter : 
+// - name : name of device searching command
+// return : 'discoverCommandsOfDevice_response()' method callback
 def discoverCommandsOfDevice(name) {
 	device = getDeviceByName(name)
     log.debug "discoverCommandsOfDevice>> name:$name, device:$device"
@@ -259,6 +265,11 @@ def discoverCommandsOfDevice_response(resp) {
     atomicState.foundCommandOfDevice = result
 
 }
+
+// discoverDevices
+// parameter : 
+// - hubname : name of hub searching devices
+// return : 'discoverDevices_response()' method callback
 def discoverDevices(hubname) {
 	log.debug "discoverDevices>> $hubname"
 	sendHubCommand(getHubAction(atomicState.hubIP, "/hubs/$hubname/devices", "discoverDevices_response"))
@@ -281,6 +292,10 @@ def discoverDevices_response(resp) {
 }
 
 
+// discoverHubs
+// parameter : 
+// - host : ip address searching hubs
+// return : 'discoverHubs_response()' method callback
 def discoverHubs(host) {
 	log.debug("discoverHubs")
     return sendHubCommand(getHubAction(host, "/hubs", "discoverHubs_response"))
@@ -300,12 +315,24 @@ def discoverHubs_response(resp) {
     atomicState.discoverdHubs = result
 }
 
+// -----------------------------
+// -------Hub Action API -------
+// getHubAction
+// parameter :
+// - host : target address to send 'GET' action
+// - url : target url
+// - callback : response callback method name
 def getHubAction(host, url, callback) {
 	log.debug "getHubAction>> $host, $url, $callback"
     return new physicalgraph.device.HubAction("GET ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
             physicalgraph.device.Protocol.LAN, "${host}", [callback: callback])
 }
 
+// setHubAction
+// parameter :
+// - host : target address to send 'POST' action
+// - url : target url
+// - callback : response callback method name
 def setHubAction(host, url, callback) {
 	log.debug "getHubAction>> $host, $url, $callback"
     return new physicalgraph.device.HubAction("POST ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
