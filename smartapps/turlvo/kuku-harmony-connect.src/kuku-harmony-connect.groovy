@@ -1,3 +1,29 @@
+/**
+ *  KuKu Harmony - Virtual Switch for Logitech Harmony
+ *
+ *  Copyright 2017 KuKu <turlvo@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  Version history
+ */
+def version() {	return "v0.1.3" }
+/*
+ *	03/28/2017 >>> v0.1.0 - Release first KuKu Harmony supports only on/off command for each device
+ *  04/13/2017 >>> v0.1.3 - Added Aircon, Fan, Roboking device type
+ */
+
 definition(
     name: "KuKu Harmony (Connect)",
     namespace: "turlvo",
@@ -34,6 +60,10 @@ def mainPage() {
 
                 section("") {
                     app( name: "harmonyDevices", title: "Add a device...", appName: "KuKu Harmony (Child)", namespace: "turlvo", multiple: true, uninstall: false)
+                }
+                
+                section("KuKu Harmony Version :") {
+					paragraph "${version()}"
                 }
             }
         }
