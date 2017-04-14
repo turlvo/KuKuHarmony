@@ -22,6 +22,7 @@ def version() {	return "v0.1.3" }
 /*
  *	03/28/2017 >>> v0.1.0 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3 - Added Aircon, Fan, Roboking device type
+ *  04/13/2017 >>> v0.1.4 - Added TV device type
  */
 
 definition(
@@ -173,7 +174,7 @@ def getLabelsOfCommands(cmds) {
 	def labels = []
     log.debug "getLabelsOfCommands>> cmds"
     cmds.each {
-    	log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
+    	//log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
     	labels.add(it.label)
     }
     

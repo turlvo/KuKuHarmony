@@ -15,12 +15,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Version history
- */
-def version() {	return "v0.1" }
-/*
- *	03/28/2017 >>> v0.1 - Release first KuKu Harmony supports only on/off command for each device
  */
  
 definition(
@@ -68,6 +62,11 @@ def addDevicePage() {
                 input name: "selectedDeviceType", type: "enum", title: "Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
                 parent.discoverCommandsOfDevice(selectedDevice)
             }
+        }  else if (selectedDevice && atomicState.deviceCommands == null) {
+            // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
+            section("") {
+                paragraph "Loading selected device's command.  This can take a minute. Please wait..."
+            }
         }
 
         if (selectedDeviceType) {    
@@ -77,6 +76,7 @@ def addDevicePage() {
                 addAirconDevice()
                 break
             case "TV":
+            	addTvDevice()
                 break
             case "STB":
                 break
@@ -90,13 +90,6 @@ def addDevicePage() {
                 log.debug "selectedDeviceType>> default"
                 addDefaultDevice()
             }
-            
-
-        } else if (selectedDevice && atomicState.deviceCommands == null) {
-            // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
-            section("") {
-                paragraph "Loading selected device's command.  This can take a minute. Please wait..."
-            }
         }
     }
 
@@ -109,11 +102,9 @@ def addDevicePage() {
 def addDefaultDevice() {
     def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
 
-    section("Select Power-on command") {            
-        input name: "selectedPowerOnFunction", type: "enum", title: "Commands", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
-    }
-    section("Select Power-off command") {            
-        input name: "selectedPowerOffFunction", type: "enum", title: "Commands", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+    section("Commands") {            
+        input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
     }
 }
 
@@ -158,6 +149,36 @@ def addAirconDevice() {
 
 }
 
+// Add device page for TV
+def addTvDevice() {
+    def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
+    state.selectedCommands = [:]    
+
+    section("Commands") {            
+        input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedVolumeUp", type: "enum", title: "Volume Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedChannelUp", type: "enum", title: "Channel Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedMute", type: "enum", title: "Mute", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedVolumeDown", type: "enum", title: "Volume Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
+        input name: "selectedChannelDown", type: "enum", title: "Channel Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false      
+        input name: "selectedMenu", type: "enum", title: "Menu", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
+        input name: "selectedInput", type: "enum", title: "Input", options: labelOfCommand, submitOnChange: true, multiple: false, required: false              
+        input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
+    }
+    
+    state.selectedCommands["power"] = selectedPowerToggle
+	state.selectedCommands["volup"] = selectedVolumeUp
+    state.selectedCommands["chup"] = selectedChannelUp
+    state.selectedCommands["mute"] = selectedMute
+    state.selectedCommands["voldown"] = selectedVolumeDown
+    state.selectedCommands["chdown"] = selectedChannelDown
+    state.selectedCommands["menu"] = selectedMenu
+    state.selectedCommands["home"] = selectedHome
+    state.selectedCommands["input"] = selectedInput
+    state.selectedCommands["back"] = selectedBack
+
+}
 // Add device page for Aircon
 def addRobokingDevice() {
     def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
@@ -266,13 +287,13 @@ def commandValue(child, command) {
 
 
 def on(child) {
-	log.debug "childApp parent on()>>  $selectedDevice, $selectedPowerOnFunction"
+	log.debug "childApp parent on()>>  $selectedDevice, $selectedPowerOn"
     def device = []
     device = parent.getDeviceByName("$selectedDevice")
     log.debug "on>> device : $device"
     
     def deviceCommands = parent.getCommandsOfDevice()
-    def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOnFunction)
+    def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOn)
     log.debug "childApp parent on() >>  $selectedPowerOffFunction, $commandSlug"
     
     def result
@@ -283,12 +304,12 @@ def on(child) {
 }
 
 def off(child) {
-	log.debug "childApp parent off()>>  $selectedDevice, $selectedPowerOffFunction"
+	log.debug "childApp parent off()>>  $selectedDevice, $selectedPowerOff"
     def device = parent.getDeviceByName("$selectedDevice")
     log.debug "off>> device : $device"
 
 	def deviceCommands = parent.getCommandsOfDevice()    
-    def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOffFunction)
+    def commandSlug = parent.getSlugOfCommandByLabel(deviceCommands, selectedPowerOff)
     log.debug "childApp parent off() >>  $selectedPowerOffFunction, $commandSlug"
     
     def result
