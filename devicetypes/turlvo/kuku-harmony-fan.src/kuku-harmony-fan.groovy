@@ -100,13 +100,13 @@ def timer() {
 
 def on() {
 	log.debug "child on()"
-	parent.command(this, "power")
+	parent.commandValue(this, "power-on")
     sendEvent(name: "switch", value: "on")
 }
 
 def off() {
 	log.debug "child off"
-	parent.command(this, "power")
+	parent.commandValue(this, "power-off")
     sendEvent(name: "switch", value: "off")
 }
 
