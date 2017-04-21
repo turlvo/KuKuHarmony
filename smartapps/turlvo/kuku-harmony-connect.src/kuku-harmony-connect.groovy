@@ -18,12 +18,13 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.4.1" }
+def version() {	return "v0.1.4.150" }
 /*
- *	03/28/2017 >>> v0.1.0 - Release first KuKu Harmony supports only on/off command for each device
- *  04/13/2017 >>> v0.1.3 - Added Aircon, Fan, Roboking device type
- *  04/13/2017 >>> v0.1.4 - Added TV device type
- *  04/13/2017 >>> v0.1.4.1 - changed DTH's default state to 'Off'
+ *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
+ *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
+ *  04/14/2017 >>> v0.1.4.000 - Added TV device type
+ *  04/21/2017 >>> v0.1.4.100 - changed DTH's default state to 'Off'
+ *  04/21/2017 >>> v0.1.4.150 - update on/off state routine and slide
  */
 
 definition(
