@@ -165,7 +165,15 @@ def parse(String description) {
 
 def power() {
     log.debug "child power()"
+    log.debug "power>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+    
     parent.command(this, "power")
+    if (currentState == "on") {
+    	sendEvent(name: "switch", value: "off")
+     } else {
+        sendEvent(name: "switch", value: "on")
+     }
 }
 
 def volup() {

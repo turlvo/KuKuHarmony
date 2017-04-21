@@ -107,11 +107,13 @@ def parse(String description) {
 def start() {
     log.debug "child start()"
     parent.command(this, "start")
+    sendEvent(name: "switch", value: "on")
 }
 
 def stop() {
     log.debug "child stop()"
     parent.command(this, "stop")
+    sendEvent(name: "switch", value: "off")
 }
 
 def home() {

@@ -70,15 +70,19 @@ metadata {
             state "yes", label: "FAN SPEED", action: "speed"
             state "no", label: "unavail", action: ""
         }
-        controlTile("tempSliderControl", "device.level", "slider", range:"(18..30)", height: 2, width: 6) {
+        controlTile("tempSliderControl", "device.level", "slider", range:"(18..30)", height: 2, width: 4) {
             state "level", action:"setRangedLevel"
         }
+        valueTile("tempSliderControlValue", "device.level", height: 2, width: 2) {
+			state "range", label:'Temperature\n${currentValue}°C', defaultState: true
+		}
 
     }
 
 	main(["switch"])
 	details(["power", "tempup", "mode",
-            "jetcool", "tempdown", "speed", "tempSliderControl"])
+            "jetcool", "tempdown", "speed", 
+            "tempSliderControl", "tempSliderControlValue"])
 }
 
 def installed() {
@@ -93,7 +97,15 @@ def parse(String description) {
 
 def power() {
     log.debug "child power()"
+    log.debug "power>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+    
     parent.command(this, "power")
+    if (currentState == "on") {
+    	sendEvent(name: "switch", value: "off")
+     } else {
+        sendEvent(name: "switch", value: "on")
+     }
 }
 
 def tempup() {
@@ -125,6 +137,7 @@ def speed() {
 def setRangedLevel(value) {
 	log.debug "setting ranged level to $value"
 	parent.commandValue(this, value)
+    sendEvent(name:"level", value:value)
 }
 
 def on() {
