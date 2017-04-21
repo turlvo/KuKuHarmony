@@ -167,13 +167,12 @@ def power() {
     log.debug "child power()"
     log.debug "power>> ${device.currentState("switch")?.value}"
     def currentState = device.currentState("switch")?.value
-    
-    parent.command(this, "power")
+
     if (currentState == "on") {
-    	sendEvent(name: "switch", value: "off")
-     } else {
-        sendEvent(name: "switch", value: "on")
-     }
+		off()
+    } else {
+        on()
+    }
 }
 
 def volup() {
@@ -260,13 +259,13 @@ def number_9(value) {
 
 def on() {
 	log.debug "child on()"
-	parent.commandValue(this, "power-on")
+	parent.command(this, "power-on")
     sendEvent(name: "switch", value: "on")
 }
 
 def off() {
 	log.debug "child off"
-	parent.commandValue(this, "power-off")
+	parent.command(this, "power-off")
     sendEvent(name: "switch", value: "off")
 }
 

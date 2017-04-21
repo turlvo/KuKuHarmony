@@ -79,13 +79,13 @@ def parse(String description) {
 
 def on() {
 	log.debug "child on()"
-	parent.on(this)
+	parent.command(this, "power-on")
     sendEvent(name: "switch", value: "on")
 }
 
 def off() {
 	log.debug "child off"
-	parent.off(this)
+	parent.command(this, "power-off")
     sendEvent(name: "switch", value: "off")
 }
 
