@@ -18,11 +18,12 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.3" }
+def version() {	return "v0.1.4.1" }
 /*
  *	03/28/2017 >>> v0.1.0 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3 - Added Aircon, Fan, Roboking device type
  *  04/13/2017 >>> v0.1.4 - Added TV device type
+ *  04/13/2017 >>> v0.1.4.1 - changed DTH's default state to 'Off'
  */
 
 definition(
@@ -50,12 +51,13 @@ def mainPage() {
         installPage()
     } else {
         dynamicPage(name: "mainPage", title: "", uninstall: true) {
-            if (installHub) {                
+            if (installHub) {             	
+            	//getHubStatus()
                 section("Harmony-API IP Address :") {
                     paragraph "${harmonyHubIP}"                    
                 }
                 
-                section("Harmony-Hub :") {
+                section("Harmony-Hub Name :") {
                     paragraph "${installHub}"                    
                 }                
 
@@ -236,24 +238,6 @@ def getHubDevices() {
 
 // --------------------------------
 // ------- HubAction Methos -------
-def getHubStatus(hubName) {
-	def params = [
-        uri: getHubUri(),
-        path: "/hubs/" + "$hubName" + "/status"
-    ]
-    //log.debug "uri : $params"
-    
-    try {
-        httpGet(params) {resp ->
-            log.debug "resp data: ${resp.data}"
-            //result = ${resp.data}
-        }
-    } catch (e) {
-        log.error "error: $e"        
-    }
-    //return result
-}
-
 // sendCommandToDevice
 // parameter : 
 // - device : target device
@@ -266,7 +250,32 @@ def sendCommandToDevice(device, command) {
 def sendCommandToDevice_response(resp) {
     def result = []
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-    log.debug("discoverHubs_response >> $body")
+    log.debug("sendCommandToDevice_response >> $body")
+}
+
+// getHubStatus
+// parameter : 
+// return : 'getHubStatus_response()' method callback
+def getHubStatus() {
+    sendHubCommand(getHubAction(atomicState.hubIP, "/hubs/$atomicState.hub/status", "getHubStatus_response"))
+}
+
+def getHubStatus_response(resp) {
+   	def result = []
+    
+    if (parseLanMessage(resp.description).body) {
+    	log.debug "getHubStatus_response>> $resp.description"
+    	def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+	
+        if(body) {            	
+            log.debug "getHubStatus_response>> $body.off"
+            if (body.off == false) {
+            	atomicState.hubStatus = "online"
+            }
+        }
+    } else {
+    	log.debug "getHubStatus_response>> Status error"
+    }
 }
 
 // discoverCommandsOfDevice
@@ -294,7 +303,6 @@ def discoverCommandsOfDevice_response(resp) {
     }
     
     atomicState.foundCommandOfDevice = result
-
 }
 
 // discoverDevices

@@ -34,7 +34,7 @@ preferences {
 }
 
 def addDevicePage() {
-    return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: 3, uninstall: true, install: true) {
+    return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: 5, uninstall: true, install: true) {
     	if (atomicState.selectedHub == null 
         	|| atomicState.selectedHub == []) {        
     		log.debug "atomicState.selectedHub is null... get a data"
@@ -56,20 +56,15 @@ def addDevicePage() {
             parent.discoverCommandsOfDevice(selectedDevice)
         }
         
-        if (selectedDevice && atomicState.deviceCommands) {
+        if (selectedDevice) {
             section("Select Device Type") {                              
-                def deviceType = ["Default", "Aircon", "TV", "STB", "Roboking", "Fan"]
+                def deviceType = ["Default", "Aircon", "TV/STB", "Roboking", "Fan"]
                 input name: "selectedDeviceType", type: "enum", title: "Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
                 parent.discoverCommandsOfDevice(selectedDevice)
             }
-        }  else if (selectedDevice && atomicState.deviceCommands == null) {
-            // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
-            section("") {
-                paragraph "Loading selected device's command.  This can take a minute. Please wait..."
-            }
-        }
-
-        if (selectedDeviceType) {    
+        }  
+		
+        if (selectedDeviceType && atomicState.deviceCommands) {    
         	atomicState.selectedDeviceType = selectedDeviceType
             switch (selectedDeviceType) {
             case "Aircon":
@@ -89,6 +84,11 @@ def addDevicePage() {
             default:
                 log.debug "selectedDeviceType>> default"
                 addDefaultDevice()
+            }
+        } else if (selectedDeviceType && atomicState.deviceCommands == null) {
+            // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
+            section("") {
+                paragraph "Loading selected device's command.  This can take a few seconds. Please wait..."
             }
         }
     }
