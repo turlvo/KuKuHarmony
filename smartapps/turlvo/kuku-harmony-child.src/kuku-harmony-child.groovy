@@ -34,7 +34,13 @@ preferences {
 }
 
 def addDevicePage() {
-    return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: 5, uninstall: true, install: true) {
+    def interval
+	if (atomicState.deviceCommands) {
+    	interval = 60
+    } else {
+		interval = 5
+    }
+    return dynamicPage(name: "addDevicePage", title: "Add Device", refreshInterval: interval, uninstall: true, install: true) {
     	if (atomicState.selectedHub == null 
         	|| atomicState.selectedHub == []) {        
     		log.debug "atomicState.selectedHub is null... get a data"
@@ -58,7 +64,7 @@ def addDevicePage() {
         
         if (selectedDevice) {
             section("Select Device Type") {                              
-                def deviceType = ["Default", "Aircon", "TV/STB", "Roboking", "Fan"]
+                def deviceType = ["Default", "Aircon", "TV", "STB", "Roboking", "Fan"]
                 input name: "selectedDeviceType", type: "enum", title: "Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
                 parent.discoverCommandsOfDevice(selectedDevice)
             }
@@ -71,6 +77,7 @@ def addDevicePage() {
                 addAirconDevice()
                 break
             case "TV":
+            case "STB":
             	addTvDevice()
                 break
             case "STB":
@@ -101,26 +108,32 @@ def addDevicePage() {
 // Add device page for Default On/Off device
 def addDefaultDevice() {
     def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
-
+	state.selectedCommands = [:]    
+    
     section("Commands") {            
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
     }
+    state.selectedCommands["power-on"] = selectedPowerOn
+	state.selectedCommands["power-off"] = selectedPowerOff
 }
 
-// Add device page for Default On/Off device
+// Add device page for Fan device
 def addFanDevice() {
     def labelOfCommand = parent.getLabelsOfCommands(atomicState.deviceCommands)
     state.selectedCommands = [:]  
 
     section("Commands") {            
-        input name: "selectedPower", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+       // input name: "selectedPower", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedSpeed", type: "enum", title: "Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedSwing", type: "enum", title: "Swing", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedTimer", type: "enum", title: "Timer", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
     }
-    
-    state.selectedCommands["power"] = selectedPower
+    //state.selectedCommands["power"] = selectedPower
+    state.selectedCommands["power-on"] = selectedPowerOn
+	state.selectedCommands["power-off"] = selectedPowerOff    
 	state.selectedCommands["speed"] = selectedSpeed
     state.selectedCommands["swing"] = selectedSwing
     state.selectedCommands["timer"] = selectedTimer
@@ -132,7 +145,9 @@ def addAirconDevice() {
     state.selectedCommands = [:]    
 
     section("Commands") {            
-        input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        //input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedTempUp", type: "enum", title: "Temperature Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedJetCool", type: "enum", title: "JetCool", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
@@ -140,7 +155,9 @@ def addAirconDevice() {
         input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false       
     }
     
-    state.selectedCommands["power"] = selectedPowerToggle
+    //state.selectedCommands["power"] = selectedPowerToggle
+    state.selectedCommands["power-on"] = selectedPowerOn
+    state.selectedCommands["power-off"] = selectedPowerOff    
 	state.selectedCommands["tempup"] = selectedTempUp
     state.selectedCommands["mode"] = selectedMode
     state.selectedCommands["jetcool"] = selectedJetCool
@@ -155,7 +172,9 @@ def addTvDevice() {
     state.selectedCommands = [:]    
 
     section("Commands") {            
-        input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        //input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedVolumeUp", type: "enum", title: "Volume Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedChannelUp", type: "enum", title: "Channel Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedMute", type: "enum", title: "Mute", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
@@ -167,7 +186,9 @@ def addTvDevice() {
         input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
     }
     
-    state.selectedCommands["power"] = selectedPowerToggle
+    //state.selectedCommands["power"] = selectedPowerToggle
+    state.selectedCommands["power-on"] = selectedPowerOn
+    state.selectedCommands["power-off"] = selectedPowerOff  
 	state.selectedCommands["volup"] = selectedVolumeUp
     state.selectedCommands["chup"] = selectedChannelUp
     state.selectedCommands["mute"] = selectedMute
@@ -186,16 +207,16 @@ def addRobokingDevice() {
 
     section("Commands") {            
         input name: "selectedStart", type: "enum", title: "Start", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
-        input name: "selectedStop", type: "enum", title: "Stop", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: true  
+        input name: "selectedStop", type: "enum", title: "Stop", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedUp", type: "enum", title: "Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedDown", type: "enum", title: "Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
         input name: "selectedLeft", type: "enum", title: "Left", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false        
         input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
         input name: "selectedTurbo", type: "enum", title: "Turbo", options: labelOfCommand, submitOnChange: true, multiple: false, required: false   
     }
-    
+
 	state.selectedCommands["start"] = selectedStart
     state.selectedCommands["stop"] = selectedStop
     state.selectedCommands["up"] = selectedUp
@@ -205,6 +226,7 @@ def addRobokingDevice() {
     state.selectedCommands["home"] = selectedHome
     state.selectedCommands["mode"] = selectedMode
     state.selectedCommands["turbo"] = selectedTurbo
+
 }
 
 // Install child device
