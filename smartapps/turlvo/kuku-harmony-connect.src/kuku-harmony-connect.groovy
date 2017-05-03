@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.4.170" }
+def version() {	return "v0.1.4.181" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -26,6 +26,7 @@ def version() {	return "v0.1.4.170" }
  *  04/21/2017 >>> v0.1.4.100 - changed DTH's default state to 'Off'
  *  04/21/2017 >>> v0.1.4.150 - update on/off state routine and slide
  *  04/22/2017 >>> v0.1.4.170 - changed 'addDevice' page's refreshInterval routine and change all device's power on/off routine
+ *  04/22/2017 >>> v0.1.4.181 - changed routine of discovering hub and added checking hub's state
  */
 
 definition(
@@ -51,8 +52,10 @@ preferences {
 def mainPage() {
     if (!atomicState?.isInstalled) {
         installPage()
-    } else {
-        dynamicPage(name: "mainPage", title: "", uninstall: true) {
+    } else {    	
+        getHubStatus()
+            
+        return dynamicPage(name: "mainPage", title: "", uninstall: true, refreshInterval: 20) {
             if (installHub) {             	
             	//getHubStatus()
                 section("Harmony-API IP Address :") {
@@ -60,7 +63,7 @@ def mainPage() {
                 }
                 
                 section("Harmony-Hub Name :") {
-                    paragraph "${installHub}"                    
+                    paragraph "${installHub} (${atomicState.hubStatus})"                    
                 }                
 
                 section("") {
@@ -92,6 +95,7 @@ def installHubPage() {
 	return dynamicPage(name: "installHubPage", title: "", refreshInterval: 3, install: true) {
         if (harmonyHubIP) {
         	atomicState.hubIP = harmonyHubIP
+            log.debug "installHubPage>> $atomicState.discoverdHubs"
             if (atomicState.discoverdHubs == null) {
         		discoverHubs(harmonyHubIP)
             }
@@ -122,7 +126,8 @@ def installHubPage() {
 // ------------------------------
 // ------- Default Method -------
 def installed() {
-    atomicState.isInstalled = true    
+    atomicState.isInstalled = true   
+    atomicState.hubStatus = "online"
     initialize()
 }
 
@@ -132,6 +137,7 @@ def updated() {
 }
 
 def initialize() {
+	log.debug "initialize()"
    // addDeviceDone()
 }
 
@@ -258,25 +264,35 @@ def sendCommandToDevice_response(resp) {
 // getHubStatus
 // parameter : 
 // return : 'getHubStatus_response()' method callback
-def getHubStatus() {
+def getHubStatus() {	
+    log.debug "getHubStatus"
     sendHubCommand(getHubAction(atomicState.hubIP, "/hubs/$atomicState.hub/status", "getHubStatus_response"))
+    if (atomicState.getHubStatusWatchdog == true) {
+    	atomicState.hubStatus = "offline"
+    }
+    atomicState.getHubStatusWatchdog = true        
 }
 
 def getHubStatus_response(resp) {
    	def result = []
+    atomicState.getHubStatusWatchdog = false
     
-    if (parseLanMessage(resp.description).body) {
-    	log.debug "getHubStatus_response>> $resp.description"
+    if (resp.description != null && parseLanMessage(resp.description).body) {
+    	log.debug "getHubStatus_response>> response: $resp.description"
     	def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
 	
-        if(body) {            	
+        if(body && body.off != null) {            	
             log.debug "getHubStatus_response>> $body.off"
             if (body.off == false) {
             	atomicState.hubStatus = "online"
             }
+        } else {
+            log.debug "getHubStatus_response>> $body.off"
+            atomicState.hubStatus = "offline"
         }
     } else {
     	log.debug "getHubStatus_response>> Status error"
+        atomicState.hubStatus = "offline"
     }
 }
 
@@ -319,7 +335,7 @@ def discoverDevices(hubname) {
 def discoverDevices_response(resp) {
 	def result = []
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-    log.debug("discoverHubs_response >> $body.hubs")
+    log.debug("discoverHubs_response >> $body.devices")
 	
     if(body) {            	
         body.devices.each {
@@ -347,13 +363,15 @@ def discoverHubs_response(resp) {
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
     log.debug("discoverHubs_response >> $body.hubs")
 	
-    if(body) {            	
+    if(body && body.hubs != null) {            	
         body.hubs.each {
             log.debug "discoverHubs_response: $it"
             result.add(it)
         }
-    }            
-    atomicState.discoverdHubs = result
+        atomicState.discoverdHubs = result
+    } else {
+    	atomicState.discoverdHubs = null
+    }    
 }
 
 // -----------------------------
