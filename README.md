@@ -4,7 +4,7 @@ KuKuHarmony is a SmartApp give users the ability to control each device by Logit
 It must work based on '[Harmony API](https://github.com/maddox/harmony-api)'
 
 With KuKuHarmony based on 'Harmony API', you can turn on and turn off devices individually.
-Other device's commands are not supported not yet. 
+The device's other commands are also support. 
 - ex) volume up/down, channel up/down, FanSpeed, Menu and so on
 
 
@@ -15,6 +15,7 @@ Other device's commands are not supported not yet.
 * List Devices
 * List Commands
 * Turn on/off each device(not a activity)
+* Control other commands also
 
 ## Setup
     [English]
@@ -45,8 +46,8 @@ Other device's commands are not supported not yet.
     
     - SmartThings Application Work(Configuration)
     8) 'Automation' -> 'SmartApps' -> 'KuKu Harmony (Connect)'
-    9) 'Add a device...' and select a device to add as a Simulated Switch
-    10) Select a turn-on command turn-off command
+    9) 'Add a device...' and select a device to add a Virtual device.
+    10) Select a turn-on command turn-off command and so on.
     
     [Korean]
     Following below blog's instruction.
