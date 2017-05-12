@@ -10,7 +10,7 @@ The device's other commands are also support.
 
 ## Features
 
-* Provide a device's Simulated Switch
+* Provide a device's Virtual device
 * List Hubs
 * List Devices
 * List Commands
@@ -52,5 +52,7 @@ The device's other commands are also support.
     [Korean]
     Following below blog's instruction.
     http://kuku.pe.kr/?p=6313
+    http://kuku.pe.kr/?p=6388
+    http://kuku.pe.kr/?p=6440
     
    
