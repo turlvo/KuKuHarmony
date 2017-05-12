@@ -26,12 +26,9 @@ Other device's commands are not supported not yet.
         docker search turlvo/harmony-api
         docker pull turlvo/harmony-api
         
-        - Make a container
-        docker run -ti --net=host --name harmony-api turlvo/harmony-api:latest /bin/bash
-        
-        - Execute harmony-api server
-        # cd /home/harmony-api/harmony-api/script/
-        # ./server
+        - Make a container and run
+        docker run -ti --net=host --name harmony-api turlvo/harmony-api:latest /home/harmony-api/harmony-api/script/server        
+        (If harmony-api's container is exit by before step, just start a container using 'docker start' command)
    
     
     - Web IDE Work
