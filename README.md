@@ -53,10 +53,10 @@ The device's other commands are also support.
         
     [Korean]
     Following below blog's instruction.
-    - First Install: http://kuku.pe.kr/?p=6313
-    - Update v0.1.4: http://kuku.pe.kr/?p=6388
-    - Update v0.1.5: http://kuku.pe.kr/?p=6616
-    - 'Harmony API' Server Auto Start(Rasp): http://kuku.pe.kr/?p=6440
-    - 'Harmony API' Server Auto Start(Synology): http://kuku.pe.kr/?p=6584
+        -First Install: http://kuku.pe.kr/?p=6313    
+        -Update v0.1.4: http://kuku.pe.kr/?p=6388
+        -Update v0.1.5: http://kuku.pe.kr/?p=6616
+        -'Harmony API' Server Auto Start(Rasp): http://kuku.pe.kr/?p=6440
+        -'Harmony API' Server Auto Start(Synology): http://kuku.pe.kr/?p=6584
     
    
