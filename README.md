@@ -16,6 +16,7 @@ The device's other commands are also support.
 * List Commands
 * Turn on/off each device(not a activity)
 * Control other commands also
+* Multiple Hubs
 
 ## Setup
     [English]
@@ -55,5 +56,6 @@ The device's other commands are also support.
     http://kuku.pe.kr/?p=6313
     http://kuku.pe.kr/?p=6388
     http://kuku.pe.kr/?p=6440
+    http://kuku.pe.kr/?p=6584
     
    
