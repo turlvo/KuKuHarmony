@@ -37,9 +37,9 @@ The device's other commands are also support.
     and add 'KuKu Harmony (Connect)' firstly, after that, add 'KuKu Harmony (Child)' SmartApp
     3) Publish 'KuKu Harmony' DTH and 'KuKu Harmony (Connect)' SmartApp for me(do not need publish child SmartApp
         
-    - SmartThings Application Work(Installation)
-    (If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.)
+    - SmartThings Application Work(Installation)    
     4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony'
+        - If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.
     5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)    
     6) Done    
     
