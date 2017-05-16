@@ -39,16 +39,20 @@ The device's other commands are also support.
     
     
     - SmartThings Application Work(Installation)
-    4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony (Connect)'
-    5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)
-    6) Select a one Hub to control
-    7) Done
+    [If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.]
+    4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony'
+    5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)    
+    6) Done
+
+    
     
     - SmartThings Application Work(Configuration)
-    8) 'Automation' -> 'SmartApps' -> 'KuKu Harmony (Connect)'
-    9) 'Add a device...' and select a device to add a Virtual device.
-    10) Select a turn-on command turn-off command and so on.
-    
+    7) 'Automation' -> 'SmartApps' -> 'KuKu Harmony'
+    8) 'Add a device...' and select a hub
+    9) Select a device to add
+    10) Select a Device Type
+    11) Select commands
+        
     [Korean]
     Following below blog's instruction.
     http://kuku.pe.kr/?p=6313
