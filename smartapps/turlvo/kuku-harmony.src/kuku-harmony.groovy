@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.5.000" }
+def version() {	return "v0.1.5.002" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -28,6 +28,7 @@ def version() {	return "v0.1.5.000" }
  *  04/22/2017 >>> v0.1.4.170 - changed 'addDevice' page's refreshInterval routine and change all device's power on/off routine
  *  04/22/2017 >>> v0.1.4.181 - changed routine of discovering hub and added checking hub's state
  *  05/16/2017 >>> v0.1.5.000 - support multiple Harmony hubs
+ *  05/19/2017 >>> v0.1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
  */
 
 definition(
@@ -102,7 +103,7 @@ def mainChildPage() {
     if (atomicState.discoverdHubs && atomicState.deviceCommands && atomicState.device) {
         interval = 60
     } else {
-        interval = 5
+        interval = 3
     }
     return dynamicPage(name: "mainChildPage", title: "Add Device", refreshInterval: interval, uninstall: true, install: true) {    	
         log.debug "mainChildPage>> parent's atomicState.harmonyApiServerIP: ${parent.getHarmonyApiServerIP()}"
@@ -139,7 +140,7 @@ def mainChildPage() {
 
             if (selectedDevice) {
                 section("Device Type :") {
-                    def deviceType = ["Default", "Aircon", "TV", "STB", "Roboking", "Fan"]
+                    def deviceType = ["Default", "Aircon", "TV", "Roboking", "Fan"]
                     input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true                    
                 }
             }  
@@ -154,7 +155,7 @@ def mainChildPage() {
                     break
                     case "TV":
                     case "STB":
-                    addTvDevice()
+                    addTvDeviceTV()
                     break
                     case "STB":
                     break
@@ -244,7 +245,7 @@ def addAirconDevice() {
 }
 
 // Add device page for TV
-def addTvDevice() {
+def addTvDeviceTV() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
     state.selectedCommands = [:]    
 
