@@ -25,6 +25,8 @@ metadata {
 		capability "Sensor"
         capability "Configuration"
         capability "Health Check"
+        command "virtualOn"
+        command "virtualOff"
         
         command "reboot"
         
@@ -87,6 +89,31 @@ def off() {
 	log.debug "child off"
 	parent.command(this, "power-off")
     sendEvent(name: "switch", value: "off")
+}
+
+def virtualOn() {
+	log.debug "child on()"	
+    sendEvent(name: "switch", value: "on")
+}
+
+def virtualOff() {
+	log.debug "child off"	
+    sendEvent(name: "switch", value: "off")
+}
+
+def generateEvent(Map results) {
+    results.each { name, value ->
+		log.debug "generateEvent>> name: $name, value: $value"
+        def currentState = device.currentValue("switch")
+		log.debug "generateEvent>> currentState: $currentState"
+        if (currentState != value) {
+        	log.debug "generateEvent>> changed to $value"
+        	sendEvent(name: "switch", value: value)
+        } else {
+        	log.debug "generateEvent>> not change"
+        }
+    }
+    return null
 }
 
 def poll() {

@@ -33,6 +33,15 @@ metadata {
         command "tempdown"
         command "speed"
         command "setRangedLevel", ["number"]
+
+        command "custom1"
+        command "custom2"
+        command "custom3"
+        command "custom4"
+        command "custom5"
+        
+        command "virtualOn"
+        command "virtualOff"
 	}
 
 	tiles (scale: 2){      
@@ -139,6 +148,31 @@ def setRangedLevel(value) {
     sendEvent(name:"level", value:value)
 }
 
+def custom1() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom2() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom3() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom4() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom5() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
 def on() {
 	log.debug "child on()"
 	parent.command(this, "power-on")
@@ -151,6 +185,16 @@ def off() {
     sendEvent(name: "switch", value: "off")
 }
 
+def virtualOn() {
+	log.debug "child on()"	
+    sendEvent(name: "switch", value: "on")
+}
+
+def virtualOff() {
+	log.debug "child off"	
+    sendEvent(name: "switch", value: "off")
+}
+
 def poll() {
 	log.debug "poll()"
 }
@@ -159,4 +203,19 @@ def parseEventData(Map results) {
     results.each { name, value ->
         //Parse events and optionally create SmartThings events
     }
+}
+
+def generateEvent(Map results) {
+    results.each { name, value ->
+		log.debug "generateEvent>> name: $name, value: $value"
+        def currentState = device.currentValue("switch")
+		log.debug "generateEvent>> currentState: $currentState"
+        if (currentState != value) {
+        	log.debug "generateEvent>> changed to $value"
+        	sendEvent(name: "switch", value: value)
+        } else {
+        	log.debug "generateEvent>> not change"
+        }
+    }
+    return null
 }

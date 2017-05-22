@@ -35,6 +35,15 @@ metadata {
         command "left"
         command "right"
         command "turbo"
+
+        command "custom1"
+        command "custom2"
+        command "custom3"
+        command "custom4"
+        command "custom5"
+        
+        command "virtualOn"
+        command "virtualOff"
 	}
 
 	tiles (scale: 2){      
@@ -150,6 +159,31 @@ def right() {
     
 }
 
+def custom1() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom2() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom3() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom4() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
+def custom5() {
+    log.debug "child custom1()"
+    parent.command(this, "custom1")
+}
+
 def on() {
 	log.debug "child on()"
 	parent.command(this, "start")
@@ -160,6 +194,31 @@ def off() {
 	log.debug "child off"
 	parent.command(this, "home")
     sendEvent(name: "switch", value: "off")
+}
+
+def virtualOn() {
+	log.debug "child on()"	
+    sendEvent(name: "switch", value: "on")
+}
+
+def virtualOff() {
+	log.debug "child off"	
+    sendEvent(name: "switch", value: "off")
+}
+
+def generateEvent(Map results) {
+    results.each { name, value ->
+		log.debug "generateEvent>> name: $name, value: $value"
+        def currentState = device.currentValue("switch")
+		log.debug "generateEvent>> currentState: $currentState"
+        if (currentState != value) {
+        	log.debug "generateEvent>> changed to $value"
+        	sendEvent(name: "switch", value: value)
+        } else {
+        	log.debug "generateEvent>> not change"
+        }
+    }
+    return null
 }
 
 def poll() {
