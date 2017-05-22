@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.5.002" }
+def version() {	return "v0.1.5.102" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -29,6 +29,7 @@ def version() {	return "v0.1.5.002" }
  *  04/22/2017 >>> v0.1.4.181 - changed routine of discovering hub and added checking hub's state
  *  05/16/2017 >>> v0.1.5.000 - support multiple Harmony hubs
  *  05/19/2017 >>> v0.1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
+ *  05/22/2017 >>> v0.1.5.102 - added routine of synchronizing device status through plug's power monitoring
  */
 
 definition(
@@ -36,12 +37,12 @@ definition(
     namespace: "turlvo",
     author: "KuKu",
     description: "This is a SmartApp that support to control Harmony's device!",
-    category: "My Apps",
+    category: "Convenience",
     parent: parent ? "turlvo.KuKu Harmony" : null,
     singleInstance: true,
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://cdn.rawgit.com/turlvo/KuKuHarmony/master/images/icon/KuKu_Harmony_Icon_1x.png",
+    iconX2Url: "https://cdn.rawgit.com/turlvo/KuKuHarmony/master/images/icon/KuKu_Harmony_Icon_2x.png",
+    iconX3Url: "https://cdn.rawgit.com/turlvo/KuKuHarmony/master/images/icon/KuKu_Harmony_Icon_3x.png")
 
 preferences {
 	page(name: "parentOrChildPage")
@@ -101,7 +102,7 @@ def getHarmonyApiServerIP() {
 def mainChildPage() {
     def interval
     if (atomicState.discoverdHubs && atomicState.deviceCommands && atomicState.device) {
-        interval = 60
+        interval = 15
     } else {
         interval = 3
     }
@@ -186,14 +187,25 @@ def mainChildPage() {
 // Add device page for Default On/Off device
 def addDefaultDevice() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-	state.selectedCommands = [:]    
-    
+    state.selectedCommands = [:]    
+
     section("Commands :") {            
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
     }
     state.selectedCommands["power-on"] = selectedPowerOn
-	state.selectedCommands["power-off"] = selectedPowerOff
+    state.selectedCommands["power-off"] = selectedPowerOff
+
+    section("Power Monitor :") {
+    	paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
+        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
+        state.triggerOnFlag = false;
+        state.triggerOffFlag = false;
+        if (powerMonitor) {                
+            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
+        }   
+    }
 }
 
 // Add device page for Fan device
@@ -202,19 +214,40 @@ def addFanDevice() {
     state.selectedCommands = [:]  
 
     section("Commands :") {            
-       // input name: "selectedPower", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
+        // input name: "selectedPower", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedSpeed", type: "enum", title: "Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedSwing", type: "enum", title: "Swing", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedTimer", type: "enum", title: "Timer", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedTimer", type: "enum", title: "Timer", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
     }
     //state.selectedCommands["power"] = selectedPower
     state.selectedCommands["power-on"] = selectedPowerOn
-	state.selectedCommands["power-off"] = selectedPowerOff    
-	state.selectedCommands["speed"] = selectedSpeed
+    state.selectedCommands["power-off"] = selectedPowerOff    
+    state.selectedCommands["speed"] = selectedSpeed
     state.selectedCommands["swing"] = selectedSwing
     state.selectedCommands["timer"] = selectedTimer
+    state.selectedCommands["custom1"] = custom1
+    state.selectedCommands["custom2"] = custom2
+    state.selectedCommands["custom3"] = custom3
+    state.selectedCommands["custom4"] = custom4
+    state.selectedCommands["custom5"] = custom5    
+
+    section("Power Monitor :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
+        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
+        state.triggerOnFlag = false;
+        state.triggerOffFlag = false;
+        if (powerMonitor) {                
+            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
+        }   
+    }
 }
 
 // Add device page for Aircon
@@ -230,18 +263,38 @@ def addAirconDevice() {
         input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedJetCool", type: "enum", title: "JetCool", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
         input name: "selectedTempDown", type: "enum", title: "Temperature Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false       
+        input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false   
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
     }
-    
+
     //state.selectedCommands["power"] = selectedPowerToggle
     state.selectedCommands["power-on"] = selectedPowerOn
     state.selectedCommands["power-off"] = selectedPowerOff    
-	state.selectedCommands["tempup"] = selectedTempUp
+    state.selectedCommands["tempup"] = selectedTempUp
     state.selectedCommands["mode"] = selectedMode
     state.selectedCommands["jetcool"] = selectedJetCool
     state.selectedCommands["tempdown"] = selectedTempDown
     state.selectedCommands["speed"] = selectedSpeed
+    state.selectedCommands["custom1"] = custom1
+    state.selectedCommands["custom2"] = custom2
+    state.selectedCommands["custom3"] = custom3
+    state.selectedCommands["custom4"] = custom4
+    state.selectedCommands["custom5"] = custom5  
 
+    section("Power Monitor :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
+        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
+        state.triggerOnFlag = false;
+        state.triggerOffFlag = false;
+        if (powerMonitor) {                
+            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
+        }   
+    } 
 }
 
 // Add device page for TV
@@ -261,7 +314,12 @@ def addTvDeviceTV() {
         input name: "selectedMenu", type: "enum", title: "Menu", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
         input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
         input name: "selectedInput", type: "enum", title: "Input", options: labelOfCommand, submitOnChange: true, multiple: false, required: false              
-        input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
+        input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
     }
     
     //state.selectedCommands["power"] = selectedPowerToggle
@@ -276,8 +334,24 @@ def addTvDeviceTV() {
     state.selectedCommands["home"] = selectedHome
     state.selectedCommands["input"] = selectedInput
     state.selectedCommands["back"] = selectedBack
-
+    state.selectedCommands["custom1"] = custom1
+    state.selectedCommands["custom2"] = custom2
+    state.selectedCommands["custom3"] = custom3
+    state.selectedCommands["custom4"] = custom4
+    state.selectedCommands["custom5"] = custom5  
+    
+    section("Power Monitor :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
+        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
+        state.triggerOnFlag = false;
+        state.triggerOffFlag = false;
+        if (powerMonitor) {                
+            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
+        }   
+    } 
 }
+
 // Add device page for Aircon
 def addRobokingDevice() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
@@ -293,6 +367,11 @@ def addRobokingDevice() {
         input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false        
         input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
         input name: "selectedTurbo", type: "enum", title: "Turbo", options: labelOfCommand, submitOnChange: true, multiple: false, required: false   
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
     }
 
 	state.selectedCommands["start"] = selectedStart
@@ -304,6 +383,51 @@ def addRobokingDevice() {
     state.selectedCommands["home"] = selectedHome
     state.selectedCommands["mode"] = selectedMode
     state.selectedCommands["turbo"] = selectedTurbo
+    state.selectedCommands["custom1"] = custom1
+    state.selectedCommands["custom2"] = custom2
+    state.selectedCommands["custom3"] = custom3
+    state.selectedCommands["custom4"] = custom4
+    state.selectedCommands["custom5"] = custom5  
+
+    section("Power Monitor :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
+        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
+        state.triggerOnFlag = false;
+        state.triggerOffFlag = false;
+        if (powerMonitor) {                
+            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
+        }   
+    } 
+}
+
+// Subscribe power value and change status
+def powerMonitorHandler(evt) {
+    def device = []    
+    device = getDeviceByName("$selectedDevice")
+    def deviceId = device.id
+    def child = getChildDevice(deviceId)
+    def event
+
+    log.debug "value is over triggerValue>> flag: $state.triggerOnFlag, value: $evt.value, triggerValue: ${triggerOnValue.floatValue()}"        
+    if (Float.parseFloat(evt.value) >= triggerOnValue.floatValue() && state.triggerOnFlag == false) {    	
+        event =  [value: "on"]
+        child.generateEvent(event)
+        log.debug "value is over send*****"
+        state.triggerOnFlag = true
+    } else if (Float.parseFloat(evt.value) < triggerOnValue.floatValue()) {
+        state.triggerOnFlag = false
+    }
+
+    log.debug "value is under triggerValue>> flag: $state.triggerOffFlag, value: $evt.value, triggerValue: ${triggerOffValue.floatValue()}"
+    if (Float.parseFloat(evt.value) <= triggerOffValue.floatValue() && state.triggerOffFlag == false){    	
+        event =  [value: "off"]        
+        child.generateEvent(event)
+        log.debug "value is under send*****"
+        state.triggerOffFlag = true
+    } else if (Float.parseFloat(evt.value) > triggerOffValue.floatValue()) {
+        state.triggerOffFlag = false
+    }
 
 }
 
@@ -313,6 +437,9 @@ def initializeChild(devicetype) {
     log.debug "addDeviceDone: $selectedDevice"
     app.updateLabel("$selectedDevice")
 
+    if (powerMonitor) {    	
+    	subscribe(powerMonitor, "power", powerMonitorHandler)
+    }
     def device = []    
     device = getDeviceByName("$selectedDevice")
     log.debug "addDeviceDone>> device: $device"    
