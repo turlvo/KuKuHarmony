@@ -59,7 +59,7 @@ metadata {
             state "no", label: "unavail", action: ""
         }
         valueTile("tempup", "device.tempup", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "∧\nTEMP", action: "tempup"
+            state "yes", label: "TEMP UP", action: "tempup"
             state "no", label: "unavail", action: ""
         }
         valueTile("mode", "device.mode", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
@@ -68,11 +68,11 @@ metadata {
         }
         
         valueTile("jetcool", "device.jetcool", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "JET\nMODE", action: "jetcool"
+            state "yes", label: "JET MODE", action: "jetcool"
             state "no", label: "unavail", action: ""
         }
         valueTile("tempdown", "device.tempdown", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "TEMP\n∨", action: "tempdown"
+            state "yes", label: "TEMP DOWN", action: "tempdown"
             state "no", label: "unavail", action: ""
         }
         valueTile("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
@@ -106,8 +106,10 @@ def parse(String description) {
 
 def power() {
     log.debug "child power()"
-    log.debug "power>> ${device.currentState("switch")?.value}"
-    def currentState = device.currentState("switch")?.value
+    
+    //def currentState = device.currentState("switch")?.value
+    def currentState = device.currentValue("switch")
+    log.debug "power>> state: $currentState"
 
     if (currentState == "on") {
 		off()
