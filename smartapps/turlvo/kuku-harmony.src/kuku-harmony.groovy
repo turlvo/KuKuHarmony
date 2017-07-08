@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.5.102" }
+def version() {	return "v0.1.5.103" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -30,6 +30,7 @@ def version() {	return "v0.1.5.102" }
  *  05/16/2017 >>> v0.1.5.000 - support multiple Harmony hubs
  *  05/19/2017 >>> v0.1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
  *  05/22/2017 >>> v0.1.5.102 - added routine of synchronizing device status through plug's power monitoring
+ *  07/09/2017 >>> v0.1.5.103 - changed child app to use parent Harmony API server IP address
  */
 
 definition(
@@ -69,11 +70,28 @@ def mainPage() {
                 input name: "harmonyHubIP", type: "text", required: true, title: "IP address?"
             }
         } 	    
-    } else {    	                    
-        return dynamicPage(name: "mainPage", title: "", uninstall: true) {
-            //getHubStatus()
+    } else {
+    	def interval
+    	discoverHubs(atomicState.harmonyApiServerIP)
+        if (atomicState.discoverdHubs) {
+            interval = 15
+        } else {
+            interval = 3
+        }
+        return dynamicPage(name: "mainPage", title: "", uninstall: true, refreshInterval: interval) {
+            //getHubStatus()            
             section("Harmony-API Server IP Address :") {
-                paragraph "${harmonyHubIP}"
+                paragraph "${atomicState.harmonyApiServerIP}"                
+            }
+            
+            section("Harmony Hub List :") {
+            	if (atomicState.discoverdHubs) {
+                	atomicState.discoverdHubs.each {
+                    	paragraph "$it"
+                    }                
+                } else {
+            		paragraph "None"
+                }
             }
 
             section("") {
@@ -610,7 +628,8 @@ def getHubDevices() {
 // - command : sending command
 // return : 'sendCommandToDevice_response()' method callback
 def sendCommandToDevice(device, command) {
-    sendHubCommand(setHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
+	log.debug("sendCommandToDevice >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
+    sendHubCommand(setHubAction(parent.getHarmonyApiServerIP(), "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
 }
 
 def sendCommandToDevice_response(resp) {
