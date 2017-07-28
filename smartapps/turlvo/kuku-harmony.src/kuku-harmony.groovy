@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.5.103" }
+def version() {	return "v0.1.5.104" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -31,6 +31,7 @@ def version() {	return "v0.1.5.103" }
  *  05/19/2017 >>> v0.1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
  *  05/22/2017 >>> v0.1.5.102 - added routine of synchronizing device status through plug's power monitoring
  *  07/09/2017 >>> v0.1.5.103 - changed child app to use parent Harmony API server IP address
+ *  07/29/2017 >>> v0.1.5.104 - fixed duplicated custom command 
  */
 
 definition(
