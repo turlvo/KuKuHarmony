@@ -165,23 +165,23 @@ def custom1() {
 }
 
 def custom2() {
-    log.debug "child custom1()"
-    parent.command(this, "custom1")
+    log.debug "child custom2()"
+    parent.command(this, "custom2")
 }
 
 def custom3() {
-    log.debug "child custom1()"
-    parent.command(this, "custom1")
+    log.debug "child custom3()"
+    parent.command(this, "custom3")
 }
 
 def custom4() {
-    log.debug "child custom1()"
-    parent.command(this, "custom1")
+    log.debug "child custom4()"
+    parent.command(this, "custom4")
 }
 
 def custom5() {
-    log.debug "child custom1()"
-    parent.command(this, "custom1")
+    log.debug "child custom5()"
+    parent.command(this, "custom5")
 }
 
 def on() {
