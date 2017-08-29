@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.5.104" }
+def version() {	return "v0.1.6.000" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -32,6 +32,7 @@ def version() {	return "v0.1.5.104" }
  *  05/22/2017 >>> v0.1.5.102 - added routine of synchronizing device status through plug's power monitoring
  *  07/09/2017 >>> v0.1.5.103 - changed child app to use parent Harmony API server IP address
  *  07/29/2017 >>> v0.1.5.104 - fixed duplicated custom command 
+ *  08/30/2017 >>> v0.1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
  */
 
 definition(
@@ -57,7 +58,6 @@ preferences {
 
 // ------------------------------
 // Pages related to Parent
-
 def parentOrChildPage() {
 	parent ? mainChildPage() : mainPage()
 }
@@ -66,11 +66,7 @@ def parentOrChildPage() {
 // seperated two danymic page by 'isInstalled' value 
 def mainPage() {
     if (!atomicState?.isInstalled) {
-        return dynamicPage(name: "installPage", title: "", install: true) {
-            section("Enter the Harmony-API Server IP address :") {
-                input name: "harmonyHubIP", type: "text", required: true, title: "IP address?"
-            }
-        } 	    
+        return installPage()
     } else {
     	def interval
     	discoverHubs(atomicState.harmonyApiServerIP)
@@ -82,7 +78,7 @@ def mainPage() {
         return dynamicPage(name: "mainPage", title: "", uninstall: true, refreshInterval: interval) {
             //getHubStatus()            
             section("Harmony-API Server IP Address :") {
-                paragraph "${atomicState.harmonyApiServerIP}"                
+            	href "installPage", title: "", description: "${atomicState.harmonyApiServerIP}"
             }
             
             section("Harmony Hub List :") {
@@ -104,6 +100,14 @@ def mainPage() {
             }
         }
     }
+}
+
+def installPage() {
+	dynamicPage(name: "installPage", title: "", install: !atomicState.isInstalled) {
+            section("Enter the Harmony-API Server IP address :") {
+       	       input name: "harmonyHubIP", type: "text", required: true, title: "IP address?"
+            }
+    } 	    
 }
 
 def initializeParent() {
@@ -215,16 +219,7 @@ def addDefaultDevice() {
     state.selectedCommands["power-on"] = selectedPowerOn
     state.selectedCommands["power-off"] = selectedPowerOff
 
-    section("Power Monitor :") {
-    	paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
-        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
-        state.triggerOnFlag = false;
-        state.triggerOffFlag = false;
-        if (powerMonitor) {                
-            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
-            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
-        }   
-    }
+	powerMonitorMenu()
 }
 
 // Add device page for Fan device
@@ -257,16 +252,7 @@ def addFanDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5    
 
-    section("Power Monitor :") {
-        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
-        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
-        state.triggerOnFlag = false;
-        state.triggerOffFlag = false;
-        if (powerMonitor) {                
-            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
-            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
-        }   
-    }
+	powerMonitorMenu()
 }
 
 // Add device page for Aircon
@@ -304,16 +290,22 @@ def addAirconDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
 
-    section("Power Monitor :") {
-        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
-        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
-        state.triggerOnFlag = false;
-        state.triggerOffFlag = false;
-        if (powerMonitor) {                
-            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
-            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
-        }   
-    } 
+	section("State Monitor :") {
+    	def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+ 
+	if (selectedMonitorType) {    
+        atomicState.selectedMonitorType = selectedMonitorType
+        switch (selectedMonitorType) {
+            case "Power Meter":
+                powerMonitorMenu()                
+            	break
+            case "Contact":
+            	contactMonitorMenu()
+                break
+        }
+    }
 }
 
 // Add device page for TV
@@ -359,16 +351,7 @@ def addTvDeviceTV() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
     
-    section("Power Monitor :") {
-        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
-        input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
-        state.triggerOnFlag = false;
-        state.triggerOffFlag = false;
-        if (powerMonitor) {                
-            input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
-            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
-        }   
-    } 
+	powerMonitorMenu()
 }
 
 // Add device page for Aircon
@@ -407,7 +390,13 @@ def addRobokingDevice() {
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
+    
+    powerMonitorMenu()
+}
 
+// ------------------------------------
+// Monitoring sub menu
+def powerMonitorMenu() {
     section("Power Monitor :") {
         paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
         input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
@@ -420,6 +409,16 @@ def addRobokingDevice() {
     } 
 }
 
+def contactMonitorMenu() {
+    section("Contact :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through contact's state(open/close), synchronize deivce status."
+        input name: "contactMonitor", type: "capability.contactSensor", title: "Device", submitOnChange: true, multiple: false, required: false
+    }
+}
+
+
+// ------------------------------------
+// Monitor Handler
 // Subscribe power value and change status
 def powerMonitorHandler(evt) {
     def device = []    
@@ -450,14 +449,36 @@ def powerMonitorHandler(evt) {
 
 }
 
+// Subscribe contact value and change status
+def contactMonitorHandler(evt) {
+    def device = []    
+    device = getDeviceByName("$selectedDevice")
+    def deviceId = device.id
+    def child = getChildDevice(deviceId)
+    def event
+
+    log.debug "contactMonitorHandler>> value is : $evt.value"
+    if (evt.value == "open") {
+        event = [value: "on"] 
+    } else {
+        event = [value: "off"] 
+    }
+    child.generateEvent(event)
+}
+
 // Install child device
 def initializeChild(devicetype) {
     //def devices = getDevices()    
-    log.debug "addDeviceDone: $selectedDevice"
+    log.debug "addDeviceDone: $selectedDevice, type: $atomicState.selectedMonitorType"
     app.updateLabel("$selectedDevice")
 
-    if (powerMonitor) {    	
+	unsubscribe()
+    if (atomicState.selectedMonitorType == "Power Meter") {  
+    	log.debug "Power: $powerMonitor"
     	subscribe(powerMonitor, "power", powerMonitorHandler)
+    } else if (atomicState.selectedMonitorType == "Contact") {
+    	log.debug "Contact: $contactMonitor"
+    	subscribe(contactMonitor, "contact", contactMonitorHandler)
     }
     def device = []    
     device = getDeviceByName("$selectedDevice")
@@ -471,6 +492,7 @@ def initializeChild(devicetype) {
         log.debug "Device already created"
     }
 }
+
 
 // For child Device
 def command(child, command) {
