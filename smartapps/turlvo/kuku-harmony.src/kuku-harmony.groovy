@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.6.000" }
+def version() {	return "v0.1.6.001" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -33,6 +33,7 @@ def version() {	return "v0.1.6.000" }
  *  07/09/2017 >>> v0.1.5.103 - changed child app to use parent Harmony API server IP address
  *  07/29/2017 >>> v0.1.5.104 - fixed duplicated custom command 
  *  08/30/2017 >>> v0.1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
+ *  09/03/2017 >>> v0.1.6.001 - hot fix - not be changed by IP chaning menu
  */
 
 definition(
@@ -105,7 +106,11 @@ def mainPage() {
 def installPage() {
 	dynamicPage(name: "installPage", title: "", install: !atomicState.isInstalled) {
             section("Enter the Harmony-API Server IP address :") {
-       	       input name: "harmonyHubIP", type: "text", required: true, title: "IP address?"
+       	       input name: "harmonyHubIP", type: "text", required: true, title: "IP address?", submitOnChange: true
+            }
+            
+            if (harmonyHubIP) {
+            	atomicState.harmonyApiServerIP = harmonyHubIP
             }
     } 	    
 }
