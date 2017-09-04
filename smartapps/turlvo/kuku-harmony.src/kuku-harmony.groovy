@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.6.001" }
+def version() {	return "v0.1.6.002" }
 /*
  *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
@@ -34,6 +34,7 @@ def version() {	return "v0.1.6.001" }
  *  07/29/2017 >>> v0.1.5.104 - fixed duplicated custom command 
  *  08/30/2017 >>> v0.1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
  *  09/03/2017 >>> v0.1.6.001 - hot fix - not be changed by IP chaning menu
+ *  09/04/2017 >>> v0.1.6.002 - hot fix - 'Power Meter' subscription is not called In the case of other devices except the air conditioner
  */
 
 definition(
@@ -224,7 +225,22 @@ def addDefaultDevice() {
     state.selectedCommands["power-on"] = selectedPowerOn
     state.selectedCommands["power-off"] = selectedPowerOff
 
-	powerMonitorMenu()
+	section("State Monitor :") {
+    	def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+
+	atomicState.selectedMonitorType = selectedMonitorType
+	if (selectedMonitorType) {    
+        switch (selectedMonitorType) {
+            case "Power Meter":
+                powerMonitorMenu()                
+            	break
+            case "Contact":
+            	contactMonitorMenu()
+                break
+        }
+    }
 }
 
 // Add device page for Fan device
@@ -257,7 +273,22 @@ def addFanDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5    
 
-	powerMonitorMenu()
+	section("State Monitor :") {
+    	def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+ 	
+    atomicState.selectedMonitorType = selectedMonitorType
+	if (selectedMonitorType) {        
+        switch (selectedMonitorType) {
+            case "Power Meter":
+                powerMonitorMenu()                
+            	break
+            case "Contact":
+            	contactMonitorMenu()
+                break
+        }
+    }
 }
 
 // Add device page for Aircon
@@ -300,8 +331,8 @@ def addAirconDevice() {
         input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
     }  
  
+ 	atomicState.selectedMonitorType = selectedMonitorType
 	if (selectedMonitorType) {    
-        atomicState.selectedMonitorType = selectedMonitorType
         switch (selectedMonitorType) {
             case "Power Meter":
                 powerMonitorMenu()                
@@ -355,8 +386,23 @@ def addTvDeviceTV() {
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
-    
-	powerMonitorMenu()
+ 
+ 	section("State Monitor :") {
+    	def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+ 
+ 	atomicState.selectedMonitorType = selectedMonitorType
+	if (selectedMonitorType) {    
+        switch (selectedMonitorType) {
+            case "Power Meter":
+                powerMonitorMenu()                
+            	break
+            case "Contact":
+            	contactMonitorMenu()
+                break
+        }
+    }
 }
 
 // Add device page for Aircon
@@ -396,7 +442,22 @@ def addRobokingDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
     
-    powerMonitorMenu()
+    section("State Monitor :") {
+    	def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+ 
+ 	atomicState.selectedMonitorType = selectedMonitorType
+    if (selectedMonitorType) {            
+        switch (selectedMonitorType) {
+            case "Power Meter":
+                powerMonitorMenu()                
+            	break
+            case "Contact":
+            	contactMonitorMenu()
+                break
+        }
+    }
 }
 
 // ------------------------------------
