@@ -17,6 +17,7 @@ The device's other commands are also support.
 * Turn on/off each device(not a activity)
 * Control other commands also
 * Multiple Hubs
+* State synchronization by Smart Plugs power or Contact Sensors state
 
 ## Setup
     [English]
