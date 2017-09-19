@@ -18,24 +18,25 @@
  *
  *  Version history
  */
-def version() {	return "v0.1.6.002" }
+def version() {	return "v1.6.500" }
 /*
- *	03/28/2017 >>> v0.1.0.000 - Release first KuKu Harmony supports only on/off command for each device
- *  04/13/2017 >>> v0.1.3.000 - Added Aircon, Fan, Roboking device type
- *  04/14/2017 >>> v0.1.4.000 - Added TV device type
- *  04/21/2017 >>> v0.1.4.100 - changed DTH's default state to 'Off'
- *  04/21/2017 >>> v0.1.4.150 - update on/off state routine and slide
- *  04/22/2017 >>> v0.1.4.170 - changed 'addDevice' page's refreshInterval routine and change all device's power on/off routine
- *  04/22/2017 >>> v0.1.4.181 - changed routine of discovering hub and added checking hub's state
- *  05/16/2017 >>> v0.1.5.000 - support multiple Harmony hubs
- *  05/19/2017 >>> v0.1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
- *  05/22/2017 >>> v0.1.5.102 - added routine of synchronizing device status through plug's power monitoring
- *  07/09/2017 >>> v0.1.5.103 - changed child app to use parent Harmony API server IP address
- *  07/29/2017 >>> v0.1.5.104 - fixed duplicated custom command 
- *  08/30/2017 >>> v0.1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
- *  09/03/2017 >>> v0.1.6.001 - hot fix - not be changed by IP chaning menu
- *  09/04/2017 >>> v0.1.6.002 - hot fix - 'Power Meter' subscription is not called In the case of other devices except the air conditioner
- */
+ *	03/28/2017 >>> v1.0.000 - Release first KuKu Harmony supports only on/off command for each device
+ *  04/13/2017 >>> v1.3.000 - Added Aircon, Fan, Roboking device type
+ *  04/14/2017 >>> v1.4.000 - Added TV device type
+ *  04/21/2017 >>> v1.4.100 - changed DTH's default state to 'Off'
+ *  04/21/2017 >>> v1.4.150 - update on/off state routine and slide
+ *  04/22/2017 >>> v1.4.170 - changed 'addDevice' page's refreshInterval routine and change all device's power on/off routine
+ *  04/22/2017 >>> v1.4.181 - changed routine of discovering hub and added checking hub's state
+ *  05/16/2017 >>> v1.5.000 - support multiple Harmony hubs
+ *  05/19/2017 >>> v1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
+ *  05/22/2017 >>> v1.5.102 - added routine of synchronizing device status through plug's power monitoring
+ *  07/09/2017 >>> v1.5.103 - changed child app to use parent Harmony API server IP address
+ *  07/29/2017 >>> v1.5.104 - fixed duplicated custom command 
+ *  08/30/2017 >>> v1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
+ *  09/03/2017 >>> v1.6.001 - hot fix - not be changed by IP chaning menu
+ *  09/04/2017 >>> v1.6.002 - hot fix - 'Power Meter' subscription is not called In the case of other devices except the air conditioner
+ *  09/18/2017 >>> v1.6.500 - added Contact Sensor's monitoring mode and changed version expression
+*/
 
 definition(
     name: "KuKu Harmony${parent ? " - Device" : ""}",
@@ -225,22 +226,7 @@ def addDefaultDevice() {
     state.selectedCommands["power-on"] = selectedPowerOn
     state.selectedCommands["power-off"] = selectedPowerOff
 
-	section("State Monitor :") {
-    	def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
-
-	atomicState.selectedMonitorType = selectedMonitorType
-	if (selectedMonitorType) {    
-        switch (selectedMonitorType) {
-            case "Power Meter":
-                powerMonitorMenu()                
-            	break
-            case "Contact":
-            	contactMonitorMenu()
-                break
-        }
-    }
+	monitorMenu() 
 }
 
 // Add device page for Fan device
@@ -273,22 +259,7 @@ def addFanDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5    
 
-	section("State Monitor :") {
-    	def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
- 	
-    atomicState.selectedMonitorType = selectedMonitorType
-	if (selectedMonitorType) {        
-        switch (selectedMonitorType) {
-            case "Power Meter":
-                powerMonitorMenu()                
-            	break
-            case "Contact":
-            	contactMonitorMenu()
-                break
-        }
-    }
+	monitorMenu() 
 }
 
 // Add device page for Aircon
@@ -326,22 +297,7 @@ def addAirconDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
 
-	section("State Monitor :") {
-    	def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
- 
- 	atomicState.selectedMonitorType = selectedMonitorType
-	if (selectedMonitorType) {    
-        switch (selectedMonitorType) {
-            case "Power Meter":
-                powerMonitorMenu()                
-            	break
-            case "Contact":
-            	contactMonitorMenu()
-                break
-        }
-    }
+	monitorMenu() 
 }
 
 // Add device page for TV
@@ -387,22 +343,7 @@ def addTvDeviceTV() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
  
- 	section("State Monitor :") {
-    	def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
- 
- 	atomicState.selectedMonitorType = selectedMonitorType
-	if (selectedMonitorType) {    
-        switch (selectedMonitorType) {
-            case "Power Meter":
-                powerMonitorMenu()                
-            	break
-            case "Contact":
-            	contactMonitorMenu()
-                break
-        }
-    }
+ 	monitorMenu() 
 }
 
 // Add device page for Aircon
@@ -442,29 +383,34 @@ def addRobokingDevice() {
     state.selectedCommands["custom4"] = custom4
     state.selectedCommands["custom5"] = custom5  
     
-    section("State Monitor :") {
-    	def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
- 
- 	atomicState.selectedMonitorType = selectedMonitorType
-    if (selectedMonitorType) {            
-        switch (selectedMonitorType) {
-            case "Power Meter":
-                powerMonitorMenu()                
-            	break
-            case "Contact":
-            	contactMonitorMenu()
-                break
-        }
-    }
+    monitorMenu() 
+
 }
 
 // ------------------------------------
 // Monitoring sub menu
+def monitorMenu() {
+    section("State Monitor :") {
+        paragraph "It is a function to complement IrDA's biggest drawback. Through sensor's state, synchronize deivce status."
+        def monitorType = ["Power Meter", "Contact"]
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
+    }  
+
+    atomicState.selectedMonitorType = selectedMonitorType
+    if (selectedMonitorType) {            
+        switch (selectedMonitorType) {
+            case "Power Meter":
+            powerMonitorMenu()                
+            break
+            case "Contact":
+            contactMonitorMenu()
+            break
+        }
+    }
+}
+
 def powerMonitorMenu() {
     section("Power Monitor :") {
-        paragraph "It is a function to complement IrDA's biggest drawback. Through plug's power monitoring, synchronize deivce status."
         input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
         state.triggerOnFlag = false;
         state.triggerOffFlag = false;
@@ -477,8 +423,12 @@ def powerMonitorMenu() {
 
 def contactMonitorMenu() {
     section("Contact :") {
-        paragraph "It is a function to complement IrDA's biggest drawback. Through contact's state(open/close), synchronize deivce status."
         input name: "contactMonitor", type: "capability.contactSensor", title: "Device", submitOnChange: true, multiple: false, required: false
+    	if (contactMonitor) {    
+            paragraph "[Normal] : Open(On) / Close(Off)\n[Reverse] : Open(Off) / Close(On)"
+            input name: "contactMonitorMode", type: "enum", title: "Mode", multiple: false, options: ["Normal", "Reverse"], defaultValue: "Normal", submitOnChange: true, required: true	
+    	}
+        atomicState.contactMonitorMode = contactMonitorMode
     }
 }
 
@@ -523,11 +473,16 @@ def contactMonitorHandler(evt) {
     def child = getChildDevice(deviceId)
     def event
 
+	def contacted = "off", notContacted = "on"
+    if (atomicState.contactMonitorMode == "Reverse") {
+    	contacted = "on"
+        notContacted = "off"
+    }
     log.debug "contactMonitorHandler>> value is : $evt.value"
     if (evt.value == "open") {
-        event = [value: "on"] 
+        event = [value: notContacted] 
     } else {
-        event = [value: "off"] 
+        event = [value: contacted] 
     }
     child.generateEvent(event)
 }
