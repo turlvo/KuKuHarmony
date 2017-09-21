@@ -22,9 +22,11 @@ The device's other commands are also support.
 ## Setup
     [English]
     - Server Work
+    [X86 Platform]
     1) Install 'Harmony API' on server following Harmony API's install instruction
     OR
-    1) Pre-build Docker image fpr Raspberry-pie platform
+    [ARM Platform]
+    1) Pre-build Docker image for Raspberry-pie platform
         - Download Image
         docker search turlvo/harmony-api
         docker pull turlvo/harmony-api
