@@ -33,13 +33,10 @@ metadata {
         //attribute   "needUpdate", "string"
 	}
 
-	simulator {
-	}
-    
-   // preferences {
-   //     input description: "Once you change values on this page, the \"configuration\" icon will change orange until all configuration parameters are updated.", displayDuringSetup: false, type: "paragraph", element: "paragraph"
-	//	generate_preferences(configuration_model())
-	//}
+    preferences {
+        input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
+        input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
+    }
 
 	tiles (scale: 2){      
 		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
@@ -83,6 +80,17 @@ def on() {
 	log.debug "child on()"
 	parent.command(this, "power-on")
     sendEvent(name: "switch", value: "on")
+
+	if (momentaryOn) {
+    	if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
+    	log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
+    	runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
+    }
+}
+
+def momentaryOnHandler() {
+	log.debug "momentaryOnHandler()"
+	sendEvent(name: "switch", value: "off")
 }
 
 def off() {
