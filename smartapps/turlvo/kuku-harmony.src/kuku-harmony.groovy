@@ -18,7 +18,7 @@
  *
  *  Version history
  */
-def version() {	return "v1.6.500" }
+def version() {	return "v1.6.501" }
 /*
  *	03/28/2017 >>> v1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v1.3.000 - Added Aircon, Fan, Roboking device type
@@ -36,6 +36,7 @@ def version() {	return "v1.6.500" }
  *  09/03/2017 >>> v1.6.001 - hot fix - not be changed by IP chaning menu
  *  09/04/2017 >>> v1.6.002 - hot fix - 'Power Meter' subscription is not called In the case of other devices except the air conditioner
  *  09/18/2017 >>> v1.6.500 - added Contact Sensor's monitoring mode and changed version expression
+ *  09/18/2017 >>> v1.6.501 - added 'Number 0' command at TV Type DTH
 */
 
 definition(
