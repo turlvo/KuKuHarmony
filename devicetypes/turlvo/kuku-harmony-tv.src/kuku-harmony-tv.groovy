@@ -270,6 +270,10 @@ def number_9(value) {
     log.debug "child number_9()"
     parent.commandValue(this, "9")   
 }
+def number_0(value) {
+    log.debug "child number_0()"
+    parent.commandValue(this, "0")   
+}
 
 def custom1() {
     log.debug "child custom1()"
