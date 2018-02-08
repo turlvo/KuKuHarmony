@@ -22,14 +22,18 @@ The device's other commands are also support.
 ## Setup
 [English]
 - Server Work
-[X86 Platform]
-1) Install 'Harmony API' on server following Harmony API's install instruction
-https://github.com/maddox/harmony-api
+1) Download docker image and run contrainer
 
-OR
+    [X86 Platform]
+    
+    Install 'Harmony API' on server following Harmony API's install instruction
+    https://github.com/maddox/harmony-api
 
-[ARM Platform]
-1) Pre-build Docker image for Raspberry-pie platform
+    OR
+
+    [ARM Platform]
+    
+    Pre-build Docker image for Raspberry-pie platform
     - Download Image
     docker search turlvo/harmony-api
     docker pull turlvo/harmony-api
