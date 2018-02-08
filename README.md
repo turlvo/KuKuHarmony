@@ -64,20 +64,28 @@ OR
 
 - Web IDE Work
 2) Add 'KuKu Harmony' DTH (Default/TV/Roboking/Aircon/Fan) and add 'KuKu Harmony' SmartApp
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/harmony11-1024x464.jpg">
 3) Publish 'KuKu Harmony' DTH and 'KuKu Harmony' SmartApp for me
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/harmony22-1024x464.jpg">
 
 - SmartThings Application Work(Installation)    
 4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony'
     (If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.)
-5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)    
-6) Done    
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_install1.jpg">
+5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282) and Save
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_install2.jpg">
 
 - SmartThings Application Work(Configuration)
-7) 'Automation' -> 'SmartApps' -> 'KuKu Harmony'
-8) 'Add a device...' and select a hub
-9) Select a device to add
-10) Select a Device Type
-11) Select commands
+6) 'Automation' -> 'SmartApps' -> 'KuKu Harmony'
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_setup1.jpg">
+7) 'Add a device...' and select a hub and device
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_setup2.jpg">
+8) Select a Device type
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_setup3.jpg">
+9) Select a Commands and 'Save' and check added device
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_setup4.jpg">
+10) Check added Thing's tile and detail
+<img src="http://kuku.pe.kr/wordpress/wp-content/uploads/2017/04/smartapp_setup6-1024x1024.jpg">
 
 
 
