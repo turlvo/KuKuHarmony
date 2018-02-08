@@ -38,26 +38,29 @@ The device's other commands are also support.
         docker run -ti --net=host --name harmony-api turlvo/harmony-api:latest /home/harmony-api/harmony-api/script/server        
         (If harmony-api's container is exit by before step, just start a container using 'docker start' command)
    
-        - Make a restart when rebooting
-        ````
-        # sudo vim /etc/systemd/system/harmony-api.service
+        - Make a container restarting when rebooting
+        
+            # sudo vim /etc/systemd/system/harmony-api.service
+            
+            -----------------------------------------------------------------------------
+            <harmony-api.service File content>
+            [Unit]
+            Description=Harmony API container
+            Requires=docker.service
+            After=docker.service
 
-        <harmony-api.service File content>
-        [Unit]
-        Description=Harmony API container
-        Requires=docker.service
-        After=docker.service
+            [Service]
+            Restart=always
+            ExecStart=/usr/bin/docker start -a harmony-api
+            ExecStop=/usr/bin/docker stop -t 2 harmony-api
 
-        [Service]
-        Restart=always
-        ExecStart=/usr/bin/docker start -a harmony-api
-        ExecStop=/usr/bin/docker stop -t 2 harmony-api
-
-        [Install]
-        WantedBy=multi-user.target
-
-        # sudo systemctl enable /etc/systemd/system/harmony-api.service
-        ````
+            [Install]
+            WantedBy=multi-user.target
+            -----------------------------------------------------------------------------
+            
+            # sudo systemctl enable /etc/systemd/system/harmony-api.service
+        
+        
     
     - Web IDE Work
     2) Add 'KuKu Harmony' DTH (Default/TV/Roboking/Aircon/Fan) and add 'KuKu Harmony' SmartApp
