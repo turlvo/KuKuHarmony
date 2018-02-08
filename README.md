@@ -24,7 +24,10 @@ The device's other commands are also support.
     - Server Work
     [X86 Platform]
     1) Install 'Harmony API' on server following Harmony API's install instruction
+    https://github.com/maddox/harmony-api
+    
     OR
+    
     [ARM Platform]
     1) Pre-build Docker image for Raspberry-pie platform
         - Download Image
@@ -35,15 +38,34 @@ The device's other commands are also support.
         docker run -ti --net=host --name harmony-api turlvo/harmony-api:latest /home/harmony-api/harmony-api/script/server        
         (If harmony-api's container is exit by before step, just start a container using 'docker start' command)
    
+        - Make a restart when rebooting
+        ````
+        # sudo vim /etc/systemd/system/harmony-api.service
+
+        <harmony-api.service File content>
+        [Unit]
+        Description=Harmony API container
+        Requires=docker.service
+        After=docker.service
+
+        [Service]
+        Restart=always
+        ExecStart=/usr/bin/docker start -a harmony-api
+        ExecStop=/usr/bin/docker stop -t 2 harmony-api
+
+        [Install]
+        WantedBy=multi-user.target
+
+        # sudo systemctl enable /etc/systemd/system/harmony-api.service
+        ````
     
     - Web IDE Work
-    2) Add 'KuKu Harmony' DTH (Default/TV/Roboking/Aircon/Fan)
-    and add 'KuKu Harmony (Connect)' firstly, after that, add 'KuKu Harmony (Child)' SmartApp
-    3) Publish 'KuKu Harmony' DTH and 'KuKu Harmony (Connect)' SmartApp for me(do not need publish child SmartApp
+    2) Add 'KuKu Harmony' DTH (Default/TV/Roboking/Aircon/Fan) and add 'KuKu Harmony' SmartApp
+    3) Publish 'KuKu Harmony' DTH and 'KuKu Harmony' SmartApp for me
         
     - SmartThings Application Work(Installation)    
     4) 'Automation' -> 'SmartApps' -> 'Add a SmartApp' -> 'My SmartApp' -> Select 'KuKu Harmony'
-        - If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.
+        (If you are using an older version, you need to remove 'KuKu Harmony (Connect)' and 'KuKu Harmony (Child)'.)
     5) Input server's private IP address 'Harmony API' is installed (ex. 192.168.1.210:8282)    
     6) Done    
     
