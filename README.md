@@ -81,6 +81,7 @@ OR
 
 [Korean]
 Following below blog's instruction.
+
 -First Install: http://kuku.pe.kr/?p=6313
 
 -Update v0.1.4: http://kuku.pe.kr/?p=6388
