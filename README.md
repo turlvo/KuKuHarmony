@@ -42,8 +42,8 @@ The device's other commands are also support.
         
             # sudo vim /etc/systemd/system/harmony-api.service
             
-            -----------------------------------------------------------------------------
             <harmony-api.service File content>
+            -----------------------------------------------------------------------------            
             [Unit]
             Description=Harmony API container
             Requires=docker.service
