@@ -79,6 +79,8 @@ OR
 10) Select a Device Type
 11) Select commands
 
+
+
 [Korean]
 Following below blog's instruction.
 
