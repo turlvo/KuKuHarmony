@@ -42,8 +42,8 @@ metadata {
 		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
-                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#79b821", icon: "st.switches.switch.on", nextState:"turningOff"
-				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#79b821", icon: "st.switches.switch.off", nextState:"turningOff"
+                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
+				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
 				attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
 			}
         }
@@ -76,27 +76,45 @@ def parse(String description) {
 	log.debug "Parsing '${description}'"
 }
 
-def on() {
-	log.debug "child on()"
-	parent.command(this, "power-on")
-    sendEvent(name: "switch", value: "on")
-
-	if (momentaryOn) {
-    	if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-    	log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-    	runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-    }
-}
-
 def momentaryOnHandler() {
 	log.debug "momentaryOnHandler()"
 	sendEvent(name: "switch", value: "off")
 }
 
+
+def on() {
+    log.debug "child on()"
+
+    log.debug "on>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+
+    if (currentState == "on") {
+        log.debug "Already turned on, skip ON command"
+    } else {
+        parent.command(this, "power-on")
+        sendEvent(name: "switch", value: "on")
+
+        if (momentaryOn) {
+            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
+            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
+            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
+        }
+    }
+}
+
 def off() {
-	log.debug "child off"
-	parent.command(this, "power-off")
-    sendEvent(name: "switch", value: "off")
+    log.debug "child off"    
+
+    log.debug "off>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+
+    if (currentState == "on") {
+        parent.command(this, "power-off")
+        sendEvent(name: "switch", value: "off")
+
+    } else {
+        log.debug "Already turned off, skip OFF command"
+    }
 }
 
 def virtualOn() {

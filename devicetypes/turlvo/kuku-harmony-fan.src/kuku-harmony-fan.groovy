@@ -50,8 +50,8 @@ metadata {
 		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
-                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#79b821", icon: "st.switches.switch.on", nextState:"turningOff"
-				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#79b821", icon: "st.switches.switch.off", nextState:"turningOff"
+                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
+				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
 				attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
 			}
         }
@@ -73,12 +73,27 @@ metadata {
             state "yes", label: "TIMER", action: "timer"
             state "no", label: "unavail", action: ""
         }
-
+        
+        valueTile("custom1", "device.custom1", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "yes", label: "custom1", action: "custom1"
+        }        
+        valueTile("custom2", "device.custom2", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "yes", label: "custom2", action: "custom2"
+        }        
+        valueTile("custom3", "device.custom3", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "yes", label: "custom3", action: "custom3"
+        }        
+        valueTile("custom4", "device.custom4", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "yes", label: "custom4", action: "custom4"
+        }        
+        valueTile("custom5", "device.custom5", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "yes", label: "custom5", action: "custom5"
+        }
     }
 
 	main(["switch"])
-	details(["power", "speed", "swing",
-            "timer"])
+	details(["power", "speed", "swing", "timer",
+    		"custom1", "custom2", "custom3", "custom4", "custom5"])
 }
 
 def installed() {
@@ -143,26 +158,46 @@ def custom5() {
     parent.command(this, "custom5")
 }
 
-def on() {
-	log.debug "child on()"
-	parent.command(this, "power-on")
-    sendEvent(name: "switch", value: "on")
-    
-	if (momentaryOn) {
-    	if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-    	log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-    	runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-    }
-}
 
 def momentaryOnHandler() {
 	log.debug "momentaryOnHandler()"
 	sendEvent(name: "switch", value: "off")
 }
+
+
+def on() {
+    log.debug "child on()"
+
+    log.debug "on>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+
+    if (currentState == "on") {
+        log.debug "Already turned on, skip ON command"
+    } else {
+        parent.command(this, "power-on")
+        sendEvent(name: "switch", value: "on")
+
+        if (momentaryOn) {
+            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
+            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
+            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
+        }
+    }
+}
+
 def off() {
-	log.debug "child off"
-	parent.command(this, "power-off")
-    sendEvent(name: "switch", value: "off")
+    log.debug "child off"    
+
+    log.debug "off>> ${device.currentState("switch")?.value}"
+    def currentState = device.currentState("switch")?.value
+
+    if (currentState == "on") {
+        parent.command(this, "power-off")
+        sendEvent(name: "switch", value: "off")
+
+    } else {
+        log.debug "Already turned off, skip OFF command"
+    }
 }
 
 def virtualOn() {
