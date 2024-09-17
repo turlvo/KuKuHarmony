@@ -106,4 +106,10 @@ Following below blog's instruction.
 
 -'Harmony API' Server Auto Start(Synology): http://kuku.pe.kr/?p=6584
     
-   
+## 🙋‍♂️ Support
+
+💙 If you like this project, give it a ⭐ and share it with friends!
+
+<a href="https://www.buymeacoffee.com/turlvo" target="_blank" title="buymeacoffee">
+  <img src="https://iili.io/JoQ1HUQ.md.png"  alt="buymeacoffee-violet-badge" style="width: 130px;">
+</a>
